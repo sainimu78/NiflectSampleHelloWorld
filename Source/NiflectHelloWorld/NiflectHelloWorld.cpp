@@ -7,7 +7,7 @@ int main()
 	Niflect::CNiflectTable table;
 	Niflect::GeneratedRegisterTypes(&table);
 	Niflect::GeneratedInitTypes();
-	table.InitTypesLayout();
+	table.BuildTypesMeta();
 
 	auto type = Niflect::StaticGetType<CHelloWorld>();
 	ASSERT(type == table.GetTypeByIndex(0));
