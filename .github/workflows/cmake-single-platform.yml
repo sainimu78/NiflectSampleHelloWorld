@@ -21,8 +21,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      submodules: recursive  # 关键：递归克隆子模块, 操作包含 git submodule update --init --remote
-      token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub 自动生成的 Token, 用于更新 submodule
+      with:  # 必须用 with 包裹参数
+        submodules: recursive  # 关键：递归克隆子模块, 操作包含 git submodule update --init --remote
+        token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub 自动生成的 Token, 用于更新 submodule
 
     - name: Check Submodules
       shell: cmd
