@@ -29,6 +29,7 @@ jobs:
       shell: cmd  # 显式指定使用 CMD 解释器
       working-directory: Build/NiflectHelloWorld/Windows
       run: |
+        echo 当前工作目录: %cd%
         Generate.bat
 
     - name: Build
