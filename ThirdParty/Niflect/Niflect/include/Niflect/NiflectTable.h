@@ -121,16 +121,7 @@ namespace Niflect
 				return m_vecType[itFound->second].Get();
 			return NULL;
 		}
-		void BuildTypesMeta() const
-		{
-#ifdef REFACTORING_0_TYPE_ACCESSOR_FIELD_RESTRUACTURING
-			for (auto& it : m_vecType)
-				it->BuildTypeMeta();
-#else
-			for (auto& it : m_vecType)
-				it->InitTypeLayout();
-#endif
-		}
+		NIFLECT_API void BuildTypesMeta() const;
 		void InsertType(const CSharedNiflectType& type, uint32 idx)
 		{
 			auto ret = m_mapIdToIndex.insert({ type->GetTypeName(), idx });
