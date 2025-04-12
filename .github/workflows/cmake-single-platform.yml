@@ -28,7 +28,7 @@ jobs:
       #run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       shell: cmd  # 显式指定使用 CMD 解释器
       run: |
-        cd ${{github.workspace}}\Build\NiflectHelloWorld\Windows
+        cd ${{github.workspace}}/Build/NiflectHelloWorld/Windows
         Generate.bat
 
     - name: Build
@@ -36,14 +36,14 @@ jobs:
       #run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       shell: cmd  # 显式指定使用 CMD 解释器
       run: |
-        cd ${{github.workspace}}\Build\NiflectHelloWorld\Windows
+        cd ${{github.workspace}}/Build/NiflectHelloWorld/Windows
         Build.bat
 
     - name: Run
       shell: cmd
       run: |
-        cd ${{github.workspace}}\Build\NiflectHelloWorld\Windows
-        cd DefaultBuild\Release\bin
+        cd ${{github.workspace}}/Build/NiflectHelloWorld/Windows
+        cd DefaultBuild/Release/bin
         NiflectHelloWorld.exe
 
 
