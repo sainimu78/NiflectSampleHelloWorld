@@ -121,7 +121,7 @@ namespace Niflect
 				return m_vecType[itFound->second].Get();
 			return NULL;
 		}
-		void InitTypesLayout() const
+		void BuildTypesMeta() const
 		{
 #ifdef REFACTORING_0_TYPE_ACCESSOR_FIELD_RESTRUACTURING
 			for (auto& it : m_vecType)

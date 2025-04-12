@@ -32,9 +32,9 @@ namespace Niflect
 		{
 			m_InitTypesFunc();
 		}
-		void InitTableTypesLayout()
+		void BuildTableTypesMeta()
 		{
-			m_table.InitTypesLayout();
+			m_table.BuildTypesMeta();
 		}
 		const Niflect::CString& GetName() const
 		{
