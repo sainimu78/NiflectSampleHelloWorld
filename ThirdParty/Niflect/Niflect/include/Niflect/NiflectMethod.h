@@ -27,12 +27,14 @@
 #include "Niflect/NiflectAddr.h"
 #include "Niflect/Base/String.h" 
 #include "Niflect/NiflectNata.h"
+#include "Niflect/NiflectCommon.h"
 
 namespace Niflect
 {
 	class CNiflectType;
 
 	typedef void (*InvokeMethodFunc)(InstanceType* base, InstanceType** const args);
+	typedef void (*InvokeFunctionFunc)(InstanceType** const args);
 
 	template <typename TType>
 	static void InvokeDefaultConstructor(InstanceType* base, InstanceType** const args)
@@ -66,16 +68,21 @@ namespace Niflect
 	public:
 		CConstructorInfo()
 			: m_Func(NULL)
+			, m_signatureHash(INVALID_HASH)
 		{
 		}
-		CConstructorInfo(const InvokeMethodFunc& Func, const CSharedNata& nata)
+		CConstructorInfo(const InvokeMethodFunc& Func, const CSharedNata& nata, const HashInt& signatureHash, const Niflect::CString& argsSignature)
 			: m_Func(Func)
 			, m_nata(nata)
+			, m_signatureHash(signatureHash)
+			, m_argsSignature(argsSignature)
 		{
 		}
 		Niflect::TArray<CParameterInfo> m_vecInput;
 		InvokeMethodFunc m_Func;
 		CSharedNata m_nata;
+		HashInt m_signatureHash;
+		Niflect::CString m_argsSignature;
 	};
 
 	class CMethodInfo
@@ -83,22 +90,50 @@ namespace Niflect
 	public:
 		CMethodInfo()
 			: m_Func(NULL)
+			, m_signatureHash(INVALID_HASH)
 		{
 		}
-		CMethodInfo(const InvokeMethodFunc& Func, const Niflect::CString& name, const CSharedNata& nata)
+		CMethodInfo(const InvokeMethodFunc& Func, const Niflect::CString& name, const CSharedNata& nata, const HashInt& signatureHash, const Niflect::CString& argsSignature)
 			: m_Func(Func)
 			, m_name(name)
+			, m_signatureHash(signatureHash)
+			, m_argsSignature(argsSignature)
 			, m_nata(nata)
 		{
 		}
-		//inline void Invoke(InstanceType* base, InstanceType** inputArray, InstanceType** ouputArray) const
-		//{
-		//	m_InvokeMethodFunc(base, inputArray, ouputArray);
-		//}
 		Niflect::TArray<CParameterInfo> m_vecInput;
 		Niflect::TArray<CParameterInfo> m_vecOutput;
 		InvokeMethodFunc m_Func;
+		HashInt m_signatureHash;
 		Niflect::CString m_name;
+		Niflect::CString m_argsSignature;
 		CSharedNata m_nata;
 	};
+
+	class CFunctionInfo
+	{
+	public:
+		CFunctionInfo()
+			: m_Func(NULL)
+			, m_signatureHash(INVALID_HASH)
+		{
+		}
+		CFunctionInfo(const InvokeFunctionFunc& Func, const Niflect::CString& name, const CSharedNata& nata, const HashInt& signatureHash, const Niflect::CString& argsSignature)
+			: m_Func(Func)
+			, m_name(name)
+			, m_signatureHash(signatureHash)
+			, m_argsSignature(argsSignature)
+			, m_nata(nata)
+		{
+		}
+		Niflect::TArray<CParameterInfo> m_vecInput;
+		Niflect::TArray<CParameterInfo> m_vecOutput;
+		InvokeFunctionFunc m_Func;
+		HashInt m_signatureHash;
+		Niflect::CString m_name;
+		Niflect::CString m_argsSignature;
+		CSharedNata m_nata;
+	};
+
+	NIFLECT_API HashInt ComputeSignatureHash(const Niflect::CString& str);
 }

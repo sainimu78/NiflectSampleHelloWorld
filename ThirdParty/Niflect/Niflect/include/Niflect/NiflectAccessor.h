@@ -1,15 +1,8 @@
 #pragma once
-#include "Niflect/NiflectBase.h"
-#include "Niflect/NiflectAddr.h"
-#include "Niflect/Serialization/RwTree.h"
-#include "Niflect/NiflectNata.h"
+#include "Niflect/NiflectField.h"
 
 namespace Niflect
 {
-	using namespace RwTree;
-
-	class CNiflectType;
-
 	class CAccessor;
 	using CSharedAccessor = TSharedPtr<CAccessor>;
 
@@ -40,35 +33,6 @@ namespace Niflect
 #endif
 
 #ifdef REFACTORING_0_TYPE_ACCESSOR_FIELD_RESTRUACTURING
-	class CField
-	{
-		friend class CNiflectType;
-	public:
-		CField()
-			: m_offset(CAddrOffset::None)
-			, m_type(NULL)
-		{
-		}
-		void Init(const Niflect::CString& name, const OffsetType& offset, CNiflectType* type, const CSharedNata& nata)
-		{
-			m_name = name;
-			m_offset = offset;
-			m_type = type;
-			m_nata = nata;
-		}
-		const Niflect::CString& GetName() const
-		{
-			return m_name;
-		}
-		NIFLECT_API bool LayoutSaveToRwNode(const InstanceType* base, CRwNode* rw) const;
-		NIFLECT_API bool LayoutLoadFromRwNode(InstanceType* base, const CRwNode* rw) const;
-
-	private:
-		Niflect::CString m_name;
-		CNiflectType* m_type;
-		CSharedNata m_nata;
-		OffsetType m_offset;
-	};
 #else
 	class CField
 	{
@@ -373,6 +337,11 @@ namespace Niflect
 		}
 		template <typename TType, int MethodIndex>
 		static void InvokeConstructor(InstanceType* base, InstanceType** const args)
+		{
+			static_assert(sizeof(TType) == 0, "This function must be specialized for type TType");//仅为避免 Intellisense 的绿线, 实际上只需要声明即可
+		}
+		template <typename TType, int FuncIndex>
+		static void InvokeStaticMemberFunction(InstanceType** const args)
 		{
 			static_assert(sizeof(TType) == 0, "This function must be specialized for type TType");//仅为避免 Intellisense 的绿线, 实际上只需要声明即可
 		}
