@@ -9,7 +9,9 @@ int main()
 	Niflect::GeneratedInitTypes();
 	table.InitTypesLayout();
 
-	printf("Type name: %s\n", table.GetTypeByIndex(0)->GetTypeName().c_str());
+	auto type = Niflect::StaticGetType<CHelloWorld>();
+	ASSERT(type == table.GetTypeByIndex(0));
+	printf("Type name: %s\n", type->GetTypeName().c_str());
 
 	return 0;
 }
