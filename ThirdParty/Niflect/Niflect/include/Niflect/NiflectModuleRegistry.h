@@ -1,0 +1,86 @@
+#pragma once
+#include "Niflect/NiflectTable.h"
+
+namespace Niflect
+{
+	typedef void (*ModuleRegisterTypesFunc)(CNiflectTable* table);
+	typedef void (*ModuleInitTypesFunc)();
+
+	class CNiflectModule2
+	{
+		friend class CNiflectModuleRegistry;
+	public:
+		CNiflectModule2()
+			: m_indexInManager(INDEX_NONE)
+			, m_RegisterTypesFunc(NULL)
+			, m_InitTypesFunc(NULL)
+			, m_table(this)
+		{
+		}
+		void InitMeta(const Niflect::CString& name, uint32 moduleIdx, const ModuleRegisterTypesFunc& RegisterTypesFunc, const ModuleInitTypesFunc& InitTypesFunc)
+		{
+			m_name = name;
+			m_RegisterTypesFunc = RegisterTypesFunc;
+			m_InitTypesFunc = InitTypesFunc;
+			m_indexInManager = moduleIdx;
+		}
+		void RegisterTypes()
+		{
+			m_RegisterTypesFunc(&m_table);
+		}
+		void InitTypes()
+		{
+			m_InitTypesFunc();
+		}
+		void InitTableTypesLayout()
+		{
+			m_table.InitTypesLayout();
+		}
+		const Niflect::CString& GetName() const
+		{
+			return m_name;
+		}
+		CNiflectTable* GetTable()
+		{
+			return &m_table;
+		}
+
+	private:
+		Niflect::CString m_name;
+		CNiflectTable m_table;
+		ModuleRegisterTypesFunc m_RegisterTypesFunc;
+		ModuleInitTypesFunc m_InitTypesFunc;
+		uint32 m_indexInManager;
+	};
+	using CSharedModule2 = Niflect::TSharedPtr<CNiflectModule2>;
+
+	class CNiflectModuleRegistry
+	{
+		friend class CNiflectModuleRegger;
+	public:
+		NIFLECT_API void InitRegisteredModules();
+		NIFLECT_API uint32 GetModulesCount() const;
+
+	private:
+		NIFLECT_API bool RegisterModuleStatically(const Niflect::CString& name, const ModuleRegisterTypesFunc& RegisterTypesFunc, const ModuleInitTypesFunc& InitTypesFunc);
+		NIFLECT_API static CNiflectModuleRegistry* InitializeSingleton();
+
+	private:
+		Niflect::TArrayNif<CSharedModule2> m_vecModule;
+	};
+
+	NIFLECT_API CNiflectModuleRegistry* GetModuleRegistry();
+	NIFLECT_API void CleanupModuleRegistry_reserved();
+
+	class CNiflectModuleRegger
+	{
+	public:
+		CNiflectModuleRegger(const Niflect::CString& name, const ModuleRegisterTypesFunc& RegisterTypesFunc, const ModuleInitTypesFunc& InitTypesFunc)
+		{
+			auto mgr = GetModuleRegistry();
+			if (mgr == NULL)
+				mgr = CNiflectModuleRegistry::InitializeSingleton();
+			mgr->RegisterModuleStatically(name, RegisterTypesFunc, InitTypesFunc);
+		}
+	};
+}
