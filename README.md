@@ -1,1 +1,1 @@
-![Build Status](https://github.com/sainimu78/NiflectHelloWorld/actions/workflows/cmake-single-platform.yml/badge.svg)
+![Build Status](https://github.com/sainimu78/NiflectHelloWorld/actions/workflows/Windows.yml/badge.svg)
