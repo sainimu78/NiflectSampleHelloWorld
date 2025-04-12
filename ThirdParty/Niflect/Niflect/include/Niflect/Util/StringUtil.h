@@ -1,5 +1,6 @@
 #pragma once
-#include "Niflect/NiflectBase.h"
+#include "Niflect/Base/String.h"
+#include "Niflect/Base/Array.h"
 #include <stdarg.h>
 #include <fstream>
 #include <algorithm>
@@ -7,23 +8,46 @@
 
 namespace NiflectUtil
 {
+	//static Niflect::CString FormatString(const char* format, ...)
+	//{
+	//	char szContent[10240] = "";
+	//	va_list va_alist;
+	//	va_start(va_alist, format);
+	//	vsnprintf(szContent, 10240, format, va_alist);
+	//	va_end(va_alist);
+	//	return szContent;
+	//}
+	//static std::string FormatStdString(const char* format, ...)
+	//{
+	//	char szContent[10240] = "";
+	//	va_list va_alist;
+	//	va_start(va_alist, format);
+	//	vsnprintf(szContent, 10240, format, va_alist);
+	//	va_end(va_alist);
+	//	return szContent;
+	//}
+
 	static Niflect::CString FormatString(const char* format, ...)
 	{
-		char szContent[10240] = "";
-		va_list va_alist;
-		va_start(va_alist, format);
-		vsnprintf(szContent, 10240, format, va_alist);
-		va_end(va_alist);
-		return szContent;
-	}
-	static std::string FormatStdString(const char* format, ...)
-	{
-		char szContent[10240] = "";
-		va_list va_alist;
-		va_start(va_alist, format);
-		vsnprintf(szContent, 10240, format, va_alist);
-		va_end(va_alist);
-		return szContent;
+		va_list args;
+
+		// 第一次获取格式化长度
+		va_start(args, format);
+		const int length = std::vsnprintf(nullptr, 0, format, args);
+		va_end(args);
+
+		if (length <= 0) return Niflect::CString();  // 处理无效格式或空输出
+
+		// 准备足够大小的缓冲区
+		Niflect::CString result;
+		result.resize(static_cast<size_t>(length));
+
+		// 实际执行格式化
+		va_start(args, format);
+		std::vsnprintf(&result[0], result.size() + 1, format, args); // +1给终止符留空间
+		va_end(args);
+
+		return result;
 	}
 	static float StringToFloat(const Niflect::CString& str)
 	{
@@ -250,7 +274,7 @@ namespace NiflectUtil
 	{
 		return NiflectUtil::Split(path, '/');
 	}
-	static Niflect::CString CombineFromPaths(const Niflect::TArray<Niflect::CString>& vecPath, const Niflect::CString& delim)
+	static Niflect::CString CombineFromStrings(const Niflect::TArray<Niflect::CString>& vecPath, const Niflect::CString& delim)
 	{
 		Niflect::CString str;
 		for (uint32 idx = 0; idx < vecPath.size(); ++idx)
@@ -261,10 +285,10 @@ namespace NiflectUtil
 		}
 		return str;
 	}
-	static Niflect::CString CombineFromPaths(const Niflect::TArray<Niflect::CString>& vecPath, char delim)
+	static Niflect::CString CombineFromStrings(const Niflect::TArray<Niflect::CString>& vecPath, char delim)
 	{
 		Niflect::CString str(1, delim);
-		return CombineFromPaths(vecPath, str);
+		return CombineFromStrings(vecPath, str);
 	}
 	static Niflect::CString Trim(const Niflect::CString& str)
 	{
@@ -277,5 +301,15 @@ namespace NiflectUtil
 
 		// 返回修剪后的字符串
 		return (start < end) ? Niflect::CString(start, end) : Niflect::CString();
+	}
+	static uint64 StableHash(const Niflect::CString& str) {
+		constexpr uint64 FNV_OFFSET_BASIS = 0xcbf29ce484222325;
+		constexpr uint64 FNV_PRIME = 0x100000001b3;
+		uint64 hash = FNV_OFFSET_BASIS;
+		for (char c : str) {
+			hash ^= static_cast<uint64>(static_cast<uint8>(c));
+			hash *= FNV_PRIME;
+		}
+		return hash;
 	}
 }

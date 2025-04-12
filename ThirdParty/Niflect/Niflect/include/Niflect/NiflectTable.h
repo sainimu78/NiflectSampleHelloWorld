@@ -19,22 +19,24 @@ namespace Niflect
 			m_name = name;
 		}
 #ifdef REFACTORING_0_TYPE_ACCESSOR_FIELD_RESTRUACTURING
+		//如作修改, 须相应修改 NiflectGen\CodeWriter\TypeReg\ModuleRegisteredTypeHeaderCodeWriter.cpp 中关联位置 ModuleRegisteredTypeHeader
 		template <typename TType, typename TInfo>
-		void RegisterTypeDetailed(const Niflect::CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata, const CConstructorInfo& ctorInfo)
+		void RegisterTypeDetailed(const Niflect::CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata, const CConstructorInfo& ctorInfo, const HashInt& typeHash)
 		{
 			auto shared = Niflect::MakeShared<TInfo>();
 			CNiflectType* type = shared.Get();
 			auto idx = this->GetTypesCount();
-			type->InitTypeMeta(this, idx, sizeof(TType), &GenericInstanceInvokeDestructor<TType>, CNiflectType::GetTypeHash<TType>(), id, inBuildTypeMetaFunc, staticTypePtrAddr, nata);
+			type->InitTypeMeta(this, idx, sizeof(TType), &GenericInstanceInvokeDestructor<TType>, typeHash, id, inBuildTypeMetaFunc, staticTypePtrAddr, nata);
 			if (ctorInfo.m_Func != NULL)
 				type->m_vecConstructorInfo.push_back(ctorInfo);
 			this->InsertType(shared, idx);
 		}
+		//如作修改, 须相应修改 NiflectGen\CodeWriter\TypeReg\ModuleRegisteredTypeHeaderCodeWriter.cpp 中关联位置 ModuleRegisteredTypeHeader
 		template <typename TType, typename TInfo>
-		void RegisterType(const Niflect::CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, const CSharedNata& nata, const InvokeMethodFunc& inInvokeConstructorFunc)
+		void RegisterType(const Niflect::CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, const CSharedNata& nata, const InvokeMethodFunc& inInvokeConstructorFunc, const HashInt& typeHash)
 		{
 			ASSERT(!TRegisteredType<TType>::IsValid());
-			this->RegisterTypeDetailed<TType, TInfo>(id, inBuildTypeMetaFunc, &TRegisteredType<TType>::s_type, nata, CConstructorInfo(inInvokeConstructorFunc, NULL));
+			this->RegisterTypeDetailed<TType, TInfo>(id, inBuildTypeMetaFunc, &TRegisteredType<TType>::s_type, nata, CConstructorInfo(inInvokeConstructorFunc, NULL, typeHash, ""), typeHash);
 			ASSERT(TRegisteredType<TType>::IsValid());
 		}
 #else

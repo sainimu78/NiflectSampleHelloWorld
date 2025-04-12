@@ -40,7 +40,7 @@ namespace Niflect
 			, m_InvokeDestructorFunc(NULL)
 			, m_BuildTypeMetaFunc(NULL)
 			, m_staticTypePtrAddr(NULL)
-			, m_typeHash(0)
+			, m_typeHash(INVALID_HASH)
 		{
 		}
 		~CNiflectType()
@@ -50,7 +50,7 @@ namespace Niflect
 		}
 
 	public:
-		void InitTypeMeta(CNiflectTable* table, uint32 tableIdx, uint32 typeSize, const InvokeDestructorFunc& inInvokeDestructorFunc, size_t typeHash, const CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata)
+		void InitTypeMeta(CNiflectTable* table, uint32 tableIdx, uint32 typeSize, const InvokeDestructorFunc& inInvokeDestructorFunc, const HashInt& typeHash, const CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata)
 		{
 			m_name = id;
 			m_table = table;
@@ -80,6 +80,10 @@ namespace Niflect
 		const uint32& GetTypeSize() const//todo: 计划改名为 GetNativeTypeSize
 		{
 			return m_typeSize;//对于C++ Built in类型, 返回类型为const ref是为了方便赋值类型用auto
+		}
+		const HashInt& GetTypeHash() const
+		{
+			return m_typeHash;
 		}
 		const CTypeLayout& GetTypeLayout() const
 		{
@@ -112,15 +116,19 @@ namespace Niflect
 			ASSERT(m_accessor == NULL);
 			m_accessor = accessor;
 		}
-		void InitAddField(const Niflect::CString& name, const OffsetType& offset, CNiflectType* type, const CSharedNata& nata)
+		void InitAddField(const Niflect::CString& name, const OffsetType& offset, CNiflectType* type, const CSharedNata& nata, const HashInt& fieldHash)
 		{
 			CField field;
-			field.Init(name, offset, type, nata);
+			field.Init(name, offset, type, nata, fieldHash);
 			m_vecFiled.push_back(field);
 		}
 		void InitAddMethodInfo(const CMethodInfo& info)
 		{
 			m_vecMethodInfo.push_back(info);
+		}
+		void InitAddStaticMemberFunctionInfo(const CFunctionInfo& info)
+		{
+			m_vecStaticMemberFunctionInfo.push_back(info);
 		}
 		void InitAddConstructorInfo(const CConstructorInfo& info)
 		{
@@ -143,13 +151,6 @@ namespace Niflect
 			return m_nata.Get();
 		}
 
-	public:
-		template <typename T>
-		static size_t GetTypeHash()
-		{
-			return typeid(T).hash_code();
-		}
-
 	private:
 		CString m_name;
 		CSharedNata m_nata;
@@ -162,13 +163,14 @@ namespace Niflect
 	public:
 		Niflect::TArray<CConstructorInfo> m_vecConstructorInfo;
 		Niflect::TArray<CMethodInfo> m_vecMethodInfo;
+		Niflect::TArray<CFunctionInfo> m_vecStaticMemberFunctionInfo;
 		InvokeDestructorFunc m_InvokeDestructorFunc;
 
 	private:
 		uint32 m_typeSize;
 		BuildTypeMetaFunc m_BuildTypeMetaFunc;
 		CStaticNiflectTypeAddr* m_staticTypePtrAddr;
-		size_t m_typeHash;
+		HashInt m_typeHash;
 	};
 #else
 	class CNiflectType
@@ -642,4 +644,6 @@ namespace Niflect
 	public:
 		//TArray<CNiflectMethod> m_vecMethod;
 	};
+
+	NIFLECT_API HashInt ComputeTypeHash(const Niflect::CString& str);
 }

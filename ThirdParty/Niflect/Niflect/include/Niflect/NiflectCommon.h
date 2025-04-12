@@ -8,8 +8,6 @@
 #include <cstdio>//printf, fflush
 #endif
 
-//¹«¹²define, typedef, const
-
 enum { INDEX_NONE = -1 };
 
 typedef char int8;
@@ -20,6 +18,12 @@ typedef int int32;
 typedef long long int64;
 typedef unsigned int uint32;
 typedef unsigned long long uint64;
+
+namespace Niflect
+{
+    enum { INVALID_HASH = 0 };
+    typedef uint64 HashInt;
+}
 
 #ifdef ASSERTION_ABORT
 #ifndef NDEBUG
