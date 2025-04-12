@@ -21,13 +21,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+      submodules: recursive  # 关键：递归克隆子模块, 操作包含 git submodule update --init --remote
+      token: ${{ secrets.GITHUB_TOKEN }}  # 使用 GitHub 自动生成的 Token, 用于更新 submodule
 
-    - name: Setup Submodule
+    - name: Check Submodules
       shell: cmd
       run: |
-        echo 更 Submodules
+        echo 检查是否更新 Submodules
         dir ThirdParty\CMakeProjectFramework
-        git submodule update --init --remote
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
