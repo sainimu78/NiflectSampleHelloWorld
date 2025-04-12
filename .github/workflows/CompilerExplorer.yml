@@ -1,0 +1,15 @@
+- name: 生成Compiler Explorer链接
+  shell: bash
+  run: |
+    # 替换为你的实际路径
+    CPP_FILE="Source/NiflectHelloWorld/NiflectHelloWorld.cpp"
+    H_FILE="Source/NiflectHelloWorld/NiflectHelloWorld.h"
+    
+    # 生成原始文件直链
+    CPP_URL="https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/$CPP_FILE"
+    H_URL="https://raw.githubusercontent.com/${{ github.repository }}/${{ github.sha }}/$H_FILE"
+    
+    # 生成一键直达链接（自动加载两个文件）
+    CE_LINK="https://godbolt.org/#g:!((g:!((h:codeEditor,i:(sources:!((name:'main',source:'%23include+%22$H_FILE%22%0A%0A'),(name:'$H_FILE',source:'')))),j:1,load:(urls:!('$CPP_URL','$H_URL')))"
+    
+    echo "点击查看编译结果: $CE_LINK"
