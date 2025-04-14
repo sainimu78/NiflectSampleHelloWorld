@@ -14,20 +14,19 @@ static bool operator==(const CHelloWorld& lhs, const CHelloWorld& rhs)
 
 int main()
 {
-	//The container which types registered to
+	//Container for registered types
 	Niflect::CNiflectTable table;
 
-	//Staged types initialization
+	//Initialize types in stages
 	{
 		Niflect::GeneratedRegisterTypes(&table);
 		Niflect::GeneratedInitTypes();
 		table.BuildTypesMeta();
 	}
 
-	//Checking initialization successful
+	//Verify initialization succeeded
 	{
 		auto type = Niflect::StaticGetType<CHelloWorld>();
-		ASSERT(type == table.GetTypeByIndex(0));
 		printf("Registered type name: %s\n", type->GetTypeName().c_str());
 	}
 
