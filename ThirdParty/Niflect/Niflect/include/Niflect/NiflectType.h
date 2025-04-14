@@ -126,7 +126,7 @@ namespace Niflect
 		{
 			m_vecMethodInfo.push_back(info);
 		}
-		void InitAddStaticMemberFunctionInfo(const CFunctionInfo& info)
+		void InitAddStaticMethodInfo(const CFunctionInfo& info)
 		{
 			m_vecStaticMemberFunctionInfo.push_back(info);
 		}

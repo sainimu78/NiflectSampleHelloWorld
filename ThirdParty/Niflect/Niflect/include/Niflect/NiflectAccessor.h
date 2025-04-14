@@ -341,7 +341,7 @@ namespace Niflect
 			static_assert(sizeof(TType) == 0, "This function must be specialized for type TType");//仅为避免 Intellisense 的绿线, 实际上只需要声明即可
 		}
 		template <typename TType, int FuncIndex>
-		static void InvokeStaticMemberFunction(InstanceType** const args)
+		static void InvokeStaticMethod(InstanceType** const args)
 		{
 			static_assert(sizeof(TType) == 0, "This function must be specialized for type TType");//仅为避免 Intellisense 的绿线, 实际上只需要声明即可
 		}
