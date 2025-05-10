@@ -4,7 +4,7 @@
 namespace Niflect
 {
 	template <typename TValue>
-	class TBuiltinTypeAccessor : public CAccessor
+	class TBuiltinTypeAccessor : public CNiflectAccessor
 	{
 	public:
 		virtual bool SaveInstanceImpl(const InstanceType* base, CRwNode* rw) const override

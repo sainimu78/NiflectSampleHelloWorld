@@ -1,9 +1,11 @@
 #pragma once
-#include "Niflect/NiflectDevelopmentMacro.h"//虽已加入 PrecompileHeader, 但仍须避免有时可能将带宏标签的类型所在头文件包含在 PrecompileHeader 中导致开发宏未定义的编译错误
 #include "Niflect/NiflectCommon.h"
 #include "Niflect/NiflectRegisteredType.h"
 #include "Niflect/NiflectMethod.h"
 #include "Niflect/NiflectAccessor.h"
+#ifdef USING_STD_ARRAY_TO_FILL_ARGS
+#include <array>
+#endif
 
 namespace Niflect
 {
@@ -37,6 +39,7 @@ namespace Niflect
 			: m_table(NULL)
 			, m_tableIdx(INDEX_NONE)
 			, m_typeSize(0)
+			, m_typeAlignment(0)
 			, m_InvokeDestructorFunc(NULL)
 			, m_BuildTypeMetaFunc(NULL)
 			, m_staticTypePtrAddr(NULL)
@@ -50,13 +53,14 @@ namespace Niflect
 		}
 
 	public:
-		void InitTypeMeta(CNiflectTable* table, uint32 tableIdx, uint32 typeSize, const InvokeDestructorFunc& inInvokeDestructorFunc, const HashInt& typeHash, const CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata)
+		void InitTypeMeta(CNiflectTable* table, uint32 tableIdx, uint32 typeSize, uint32 typeAlignment, const InvokeDestructorFunc& inInvokeDestructorFunc, const HashInt& typeHash, const CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata)
 		{
 			m_name = id;
 			m_table = table;
 			m_tableIdx = tableIdx;
 			m_nata = nata;
 			m_typeSize = typeSize;
+			m_typeAlignment = typeAlignment;
 			m_InvokeDestructorFunc = inInvokeDestructorFunc;
 			m_BuildTypeMetaFunc = inBuildTypeMetaFunc;
 			m_staticTypePtrAddr = staticTypePtrAddr;
@@ -81,6 +85,10 @@ namespace Niflect
 		{
 			return m_typeSize;//对于C++ Built in类型, 返回类型为const ref是为了方便赋值类型用auto
 		}
+		const uint32& GetTypeAlignment() const
+		{
+			return m_typeAlignment;
+		}
 		const HashInt& GetTypeHash() const
 		{
 			return m_typeHash;
@@ -93,21 +101,29 @@ namespace Niflect
 		{
 			return m_vecFiled;
 		}
+		CNiflectAccessor* GetAccessor() const
+		{
+			return m_accessor.Get();
+		}
 
 	public:
-		bool SaveInstanceToRwNode(const InstanceType* base, CRwNode* rw) const
+		inline bool SaveInstanceToRwNode(const InstanceType* base, CRwNode* rw) const
 		{
 			return m_layout.AccessorsSaveToRwNode(base, rw);
 		}
-		bool LoadInstanceFromRwNode(InstanceType* base, const CRwNode* rw) const
+		inline bool LoadInstanceFromRwNode(InstanceType* base, const CRwNode* rw) const
 		{
 			return m_layout.AccessorsLoadFromRwNode(base, rw);
+		}
+		inline bool BuildInstanceNode(CNiflectInstanceNode* node)
+		{
+			return m_layout.AccessorsBuildInstanceNode(node);
 		}
 
 	public:
 		void BuildTypeMeta()
 		{
-			ASSERT(m_layout.m_vecSection.size() == 0);
+			ASSERT(m_layout.m_vecSubobject.size() == 0);
 			this->InitTypeLayout(m_layout);
 			m_BuildTypeMetaFunc(this);
 		}
@@ -138,7 +154,7 @@ namespace Niflect
 	protected:
 		virtual void InitTypeLayout(CTypeLayout& layout)
 		{
-			layout.m_vecSection.push_back(this);
+			layout.m_vecSubobject.push_back(this);
 		}
 
 	public:
@@ -168,6 +184,7 @@ namespace Niflect
 
 	private:
 		uint32 m_typeSize;
+		uint32 m_typeAlignment;
 		BuildTypeMetaFunc m_BuildTypeMetaFunc;
 		CStaticNiflectTypeAddr* m_staticTypePtrAddr;
 		HashInt m_typeHash;
@@ -305,7 +322,7 @@ namespace Niflect
 			ASSERT(m_layout.m_vecAccessor.size() == 0);
 			this->CreateTypeLayout(m_layout);
 		}
-		void InitAddFieldToAccessor(CAccessor* owner, const Niflect::CString& name, const OffsetType& offset, const CSharedNata& nata) const
+		void InitAddFieldToAccessor(CNiflectAccessor* owner, const Niflect::CString& name, const OffsetType& offset, const CSharedNata& nata) const
 		{
 			CField field;
 			field.Init(name, nata);
@@ -314,7 +331,7 @@ namespace Niflect
 				it1->InitOffset(offset);
 			owner->InitAddField(field);
 		}
-		void InitAccessorElementLayout(CAccessor* owner) const
+		void InitAccessorElementLayout(CNiflectAccessor* owner) const
 		{
 			CTypeLayout layout;
 			this->CreateTypeLayout(layout);
@@ -393,6 +410,19 @@ namespace Niflect
 	using CSharedNiflectType = TSharedPtr<CNiflectType>;
 
 #ifdef REFACTORING_0_TYPE_ACCESSOR_FIELD_RESTRUACTURING
+	#ifdef USING_STD_ARRAY_TO_FILL_ARGS
+	template <typename TMemory, typename TBase, typename ...TArgs>
+	inline static TSharedPtr<TBase> NiflectTypeGenericMakeShared(const CNiflectType* type, TArgs&& ...args)
+	{
+		std::array<Niflect::InstanceType*, sizeof ...(TArgs)> argArray = { (&args)... };
+		return GenericPlacementMakeShared<TBase, TMemory>(type->GetTypeSize(), type->m_InvokeDestructorFunc, type->m_vecConstructorInfo[0].m_Func, argArray.data());
+	}
+	template <typename TBase, typename ...TArgs>
+	inline static TSharedPtr<TBase> NiflectTypeMakeShared(const CNiflectType* type, TArgs&& ...args)
+	{
+		return NiflectTypeGenericMakeShared<CMemory, TBase>(type, std::forward<TArgs>(args)...);
+	}
+	#else
 	template <typename TBase, typename ...TArgs>
 	inline static TSharedPtr<TBase> NiflectTypeMakeShared(const CNiflectType* type)
 	{
@@ -408,6 +438,7 @@ namespace Niflect
 		ASSERT(type->m_vecConstructorInfo[0].m_vecInput.size() > 0);
 		return GenericPlacementMakeShared<TBase, CMemory>(type->GetTypeSize(), type->m_InvokeDestructorFunc, type->m_vecConstructorInfo[0].m_Func, argArray);
 	}
+	#endif
 #else
 	template <typename TBase>
 	inline static TSharedPtr<TBase> NiflectTypeMakeShared(const CNiflectType* type)
@@ -522,7 +553,7 @@ namespace Niflect
 				auto par = m_parent;
 				while (par != NULL)
 				{
-					layout.m_vecSection.insert(layout.m_vecSection.begin(), par);
+					layout.m_vecSubobject.insert(layout.m_vecSubobject.begin(), par);
 					par = par->m_parent;
 				}
 			}
@@ -645,5 +676,9 @@ namespace Niflect
 		//TArray<CNiflectMethod> m_vecMethod;
 	};
 
+	inline static bool IsSameType(const CNiflectType* a, const CNiflectType* b)
+	{
+		return a->GetTypeHash() == b->GetTypeHash();
+	}
 	NIFLECT_API HashInt ComputeTypeHash(const Niflect::CString& str);
 }

@@ -3,7 +3,7 @@
 
 namespace Niflect
 {
-	class CSTLStringAccessor : public CAccessor
+	class CSTLStringAccessor : public CNiflectAccessor
 	{
 	public:
 		virtual bool SaveInstanceImpl(const InstanceType* base, CRwNode* rw) const override

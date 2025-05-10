@@ -60,6 +60,7 @@ namespace Niflect
 	public:
 		NIFLECT_API void InitRegisteredModules();
 		NIFLECT_API uint32 GetModulesCount() const;
+		NIFLECT_API CNiflectModule2* GetModuleByIndex(uint32 idx) const;
 
 	private:
 		NIFLECT_API bool RegisterModuleStatically(const Niflect::CString& name, const ModuleRegisterTypesFunc& RegisterTypesFunc, const ModuleInitTypesFunc& InitTypesFunc);

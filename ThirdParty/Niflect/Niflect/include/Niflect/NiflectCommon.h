@@ -1,9 +1,9 @@
 #pragma once
+#include "Niflect/NiflectDevelopmentMacro.h"//虽已加入 PrecompileHeader, 但仍须避免有时可能将带宏标签的类型所在头文件包含在 PrecompileHeader 中导致开发宏未定义的编译错误
 #include <cstddef>//NULL
 #define ASSERTION_ABORT
 #ifdef ASSERTION_ABORT
 #include <cassert>//assert
-#include <cstdio>//fflush
 #else
 #include <cstdio>//printf, fflush
 #endif
@@ -32,7 +32,6 @@ namespace Niflect
             bool cond = b;\
             if (!cond)\
             {\
-                fflush(stdout);\
                 assert(false);\
             }\
         } while(0)

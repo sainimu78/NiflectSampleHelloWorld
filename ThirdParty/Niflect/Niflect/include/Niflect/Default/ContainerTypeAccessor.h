@@ -3,15 +3,15 @@
 
 namespace Niflect
 {
-	class CArrayAccessor : public CAccessor
+	class CArrayAccessor : public CNiflectAccessor
 	{
 	public:
 		//专门封装 Cast 是为表示本类作为框架支撑的类型, 需要被 Cast
-		static CArrayAccessor* CastChecked(Niflect::CAccessor* base)
+		static CArrayAccessor* CastChecked(Niflect::CNiflectAccessor* base)
 		{
 			return dynamic_cast<CArrayAccessor*>(base);
 		}
-		static const CArrayAccessor* CastChecked(const Niflect::CAccessor* base)
+		static const CArrayAccessor* CastChecked(const Niflect::CNiflectAccessor* base)
 		{
 			return dynamic_cast<const CArrayAccessor*>(base);
 		}
@@ -26,12 +26,12 @@ namespace Niflect
 			auto& instance = *static_cast<const TArrayType*>(base);
 			ASSERT(!rw->IsArray());
 			auto rwArray = rw->ToArray();
-			auto& elemLyaout = this->GetElementLayout();
+			auto elemType = this->GetElementType();
 			for (auto idx = 0; idx < instance.size(); ++idx)
 			{
 				auto rwItem = CreateRwNode();
 				auto elemBase = &instance[idx];//如std::vector<bool>无法支持, 因此额外定义特化模板 GetElementBaseToX, 也可改用std::vector<uint8>, 或另定义Accessor
-				if (elemLyaout.AccessorsSaveToRwNode(elemBase, rwItem.Get()))
+				if (elemType->SaveInstanceToRwNode(elemBase, rwItem.Get()))
 					rwArray->AddItem(rwItem);
 			}
 			return true;
@@ -41,27 +41,41 @@ namespace Niflect
 			auto& instance = *static_cast<TArrayType*>(base);
 			ASSERT(rw->IsArray());
 			auto rwArray = rw->GetArray();
-			auto& elemLayout = this->GetElementLayout();
+			auto elemType = this->GetElementType();
 			instance.resize(rwArray->GetItemsCount());
 			for (auto idx = 0; idx < instance.size(); ++idx)
 			{
 				auto rwItem = rwArray->GetItem(idx);
 				auto elemBase = &instance[idx];
-				elemLayout.AccessorsLoadFromRwNode(elemBase, rwItem);
+				elemType->LoadInstanceFromRwNode(elemBase, rwItem);
+			}
+			return true;
+		}
+		virtual bool BuildInstanceNodeImpl(CNiflectInstanceNode* node) const override
+		{
+			auto& instance = *static_cast<TArrayType*>(node->GetBase());
+			auto elemType = this->GetElementType();
+			uint32 idx = 0;
+			for (auto& it : instance)
+			{
+				auto elemNode = CreateInstanceNode();
+				auto elemBase = &it;
+				if (elemNode->InitAndBuild(elemType, elemBase, std::to_string(idx++).c_str(), node))
+					node->AddNode(elemNode);
 			}
 			return true;
 		}
 	};
 
-	class CBitsArrayAccessor : public CAccessor
+	class CBitsArrayAccessor : public CNiflectAccessor
 	{
 	public:
 		//专门封装 Cast 是为表示本类作为框架支撑的类型, 需要被 Cast
-		static CBitsArrayAccessor* CastChecked(CAccessor* base)
+		static CBitsArrayAccessor* CastChecked(CNiflectAccessor* base)
 		{
 			return dynamic_cast<CBitsArrayAccessor*>(base);
 		}
-		static const CBitsArrayAccessor* CastChecked(const CAccessor* base)
+		static const CBitsArrayAccessor* CastChecked(const CNiflectAccessor* base)
 		{
 			return dynamic_cast<const CBitsArrayAccessor*>(base);
 		}
@@ -96,15 +110,15 @@ namespace Niflect
 		}
 	};
 
-	class CMapAccessor : public CAccessor
+	class CMapAccessor : public CNiflectAccessor
 	{
 	public:
 		//专门封装 Cast 是为表示本类作为框架支撑的类型, 需要被 Cast
-		static CMapAccessor* CastChecked(CAccessor* base)
+		static CMapAccessor* CastChecked(CNiflectAccessor* base)
 		{
 			return dynamic_cast<CMapAccessor*>(base);
 		}
-		static const CMapAccessor* CastChecked(const CAccessor* base)
+		static const CMapAccessor* CastChecked(const CNiflectAccessor* base)
 		{
 			return dynamic_cast<const CMapAccessor*>(base);
 		}
@@ -120,12 +134,12 @@ namespace Niflect
 			auto& instance = *static_cast<const TMapType*>(base);
 			ASSERT(!rw->IsArray());
 			auto rwArray = rw->ToArray();
-			auto& elemLayout = this->GetElementLayout();
+			auto elemType = this->GetElementType();
 			for (auto& it : instance)
 			{
 				auto rwItem = CreateRwNode();
 				auto elemBase = &it;
-				if (elemLayout.AccessorsSaveToRwNode(elemBase, rwItem.Get()))
+				if (elemType->SaveInstanceToRwNode(elemBase, rwItem.Get()))
 					rwArray->AddItem(rwItem);
 			}
 			return true;
@@ -135,15 +149,29 @@ namespace Niflect
 			auto& instance = *static_cast<TMapType*>(base);
 			ASSERT(rw->IsArray());
 			auto rwArray = rw->GetArray();
-			auto& elemLayout = this->GetElementLayout();
+			auto elemType = this->GetElementType();
 			auto cnt = rwArray->GetItemsCount();
 			for (uint32 idx = 0; idx < cnt; ++idx)
 			{
 				auto rwItem = rwArray->GetItem(idx);
 				TElem item;
 				auto elemBase = &item;
-				if (elemLayout.AccessorsLoadFromRwNode(elemBase, rwItem))
+				if (elemType->LoadInstanceFromRwNode(elemBase, rwItem))
 					instance.insert(item);
+			}
+			return true;
+		}
+		virtual bool BuildInstanceNodeImpl(CNiflectInstanceNode* node) const override
+		{
+			auto& instance = *static_cast<TMapType*>(node->GetBase());
+			auto elemType = this->GetElementType();
+			uint32 idx = 0;
+			for (auto& it : instance)
+			{
+				auto elemBase = &it;
+				auto elemNode = CreateInstanceNode();
+				if (elemNode->InitAndBuild(elemType, elemBase, std::to_string(idx++).c_str(), node))
+					node->AddNode(elemNode);
 			}
 			return true;
 		}
