@@ -36,7 +36,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       #run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       shell: cmd  # 显式指定使用 CMD 解释器
-      working-directory: Build/NiflectHelloWorld/Windows
+      working-directory: Build/HelloWorld/Windows
       run: |
         echo 当前工作目录: %cd%
         Generate.bat
@@ -45,15 +45,15 @@ jobs:
       # Build your program with the given configuration
       #run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       shell: cmd  # 显式指定使用 CMD 解释器
-      working-directory: Build/NiflectHelloWorld/Windows
+      working-directory: Build/HelloWorld/Windows
       run: |
         Build.bat
 
     - name: Run
       shell: cmd
-      working-directory: Build/NiflectHelloWorld/Windows/DefaultBuild/Release/bin
+      working-directory: Build/HelloWorld/Windows/DefaultBuild/Release/bin
       run: |
-        NiflectHelloWorld.exe
+        HelloWorld.exe
 
 
     #- name: Test

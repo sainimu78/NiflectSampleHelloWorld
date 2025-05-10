@@ -1,3 +1,3 @@
 @echo off
-@set ProjectDirPath=..\..\..\..\Project\NiflectHelloWorld
+@set ProjectDirPath=..\..\..\..\Project\HelloWorld
 @..\..\..\ThirdParty\CMakeProjectFramework\PlatformSpecificScript\Windows\Update.bat

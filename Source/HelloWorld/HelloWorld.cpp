@@ -1,5 +1,5 @@
 #include "HelloWorld.h"
-#include "NiflectHelloWorld_private.h"
+#include "HelloWorld_private.h"
 #include "Niflect/Serialization/JsonFormat.h"
 
 static void InitForTest(CHelloWorld& instance)

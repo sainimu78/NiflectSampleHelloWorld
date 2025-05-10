@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10.0)
 
 include(../InitRootPath.cmake)
 
-set(c_ProjectName NiflectHelloWorld)
+set(c_ProjectName HelloWorld)
 
 include(${c_RootCMakeProjectFrameworkDirPath}/ProjectBegin.cmake)
 project(${c_ProjectName})
