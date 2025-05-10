@@ -317,7 +317,11 @@ namespace RwTree
 		}
 		void AddItem(const CSharedRwNode& item)
 		{
-			m_vecItem.push_back(item);
+			this->InsertItem(item, this->GetItemsCount());
+		}
+		void InsertItem(const CSharedRwNode& item, uint32 idx)
+		{
+			m_vecItem.insert(m_vecItem.begin() + idx, item);
 		}
 		CRwNode* AddItemNode()
 		{
@@ -371,6 +375,14 @@ namespace RwTree
 		void Resize(uint32 cnt)
 		{
 			m_vecItem.resize(cnt);
+		}
+		void DeleteItem(uint32 idx)
+		{
+			m_vecItem.erase(m_vecItem.begin() + idx);
+		}
+		void DeleteLastItem()
+		{
+			m_vecItem.erase(m_vecItem.begin() + (m_vecItem.size() - 1));
 		}
 
 	private:
@@ -489,6 +501,118 @@ namespace RwTree
 		{
 			return m_data;
 		}
+
+	//public:
+	//	// 在 CRwNode 类的 public 部分添加以下声明
+	//	bool Equals(const CRwNode* other) const
+	//	{
+
+	//		if (this == other)
+	//			return true;
+	//		if (!other)
+	//			return false;
+
+	//		// 比较节点名称
+	//		if (m_name != other->m_name)
+	//			return false;
+
+	//		// 检查类型一致性（值节点/数组节点）
+	//		bool thisIsValue = IsValue();
+	//		bool otherIsValue = other->IsValue();
+	//		bool thisIsArray = IsArray();
+	//		bool otherIsArray = other->IsArray();
+
+	//		if (thisIsValue != otherIsValue || thisIsArray != otherIsArray)
+	//			return false;
+
+	//		// 值节点比较
+	//		if (thisIsValue) {
+	//			if (m_valueType != other->m_valueType)
+	//				return false;
+	//			return CompareValueData(other);
+	//		}
+
+	//		// 数组/普通节点比较子节点
+	//		if (m_vecNode.size() != other->m_vecNode.size())
+	//			return false;
+
+	//		for (size_t i = 0; i < m_vecNode.size(); ++i) {
+	//			const auto& thisNode = m_vecNode[i];
+	//			const auto& otherNode = other->m_vecNode[i];
+
+	//			// 处理空指针情况
+	//			if (!thisNode || !otherNode) {
+	//				if (thisNode || otherNode) // 其中一个非空
+	//					return false;
+	//				else
+	//					continue; // 都为空则继续
+	//			}
+
+	//			if (!thisNode->Equals(otherNode.Get()))
+	//				return false;
+	//		}
+
+	//		return true;
+	//	}
+
+	//private:
+	//	// 在 CRwNode 类的 private 部分添加以下辅助函数声明
+	//	bool CompareValueData(const CRwNode* other) const
+	//	{
+	//		// 确保类型一致（调用前已检查）
+	//		auto thisValue = GetValue();
+	//		auto otherValue = other->GetValue();
+
+	//		// 检查数据长度一致性
+	//		if (m_data.size() != other->m_data.size())
+	//			return false;
+
+	//		// 根据类型进行数据比较
+	//		switch (m_valueType) {
+	//		case ERwValueType::String:
+	//			return m_data == other->m_data;
+
+	//		case ERwValueType::RawData:
+	//			return memcmp(m_data.data(), other->m_data.data(), m_data.size()) == 0;
+
+	//			// 基本类型使用 CRwValue 的 Get 方法精确比较
+	//		case ERwValueType::Bool:
+	//			return thisValue->GetBool() == otherValue->GetBool();
+	//		case ERwValueType::Int8:
+	//			return thisValue->GetInt8() == otherValue->GetInt8();
+	//		case ERwValueType::Int16:
+	//			return thisValue->GetInt16() == otherValue->GetInt16();
+	//		case ERwValueType::Int32:
+	//			return thisValue->GetInt32() == otherValue->GetInt32();
+	//		case ERwValueType::Int64:
+	//			return thisValue->GetInt64() == otherValue->GetInt64();
+	//		case ERwValueType::Uint8:
+	//			return thisValue->GetUint8() == otherValue->GetUint8();
+	//		case ERwValueType::Uint16:
+	//			return thisValue->GetUint16() == otherValue->GetUint16();
+	//		case ERwValueType::Uint32:
+	//			return thisValue->GetUint32() == otherValue->GetUint32();
+	//		case ERwValueType::Uint64:
+	//			return thisValue->GetUint64() == otherValue->GetUint64();
+	//		case ERwValueType::Float:
+	//			return thisValue->GetFloat() == otherValue->GetFloat();
+	//		case ERwValueType::Double:
+	//			return thisValue->GetDouble() == otherValue->GetDouble();
+
+	//		default:
+	//			return false; // 未知类型
+	//		}
+	//	}
+		//bool IsUnused() const
+		//{
+		//	return
+		//		m_name.empty() &&            // 未设置名称
+		//		m_vecNode.empty() &&         // 没有子节点
+		//		m_data.empty() &&            // 数据缓冲区为空
+		//		m_valueType == ERwValueType::None && // 未指定类型
+		//		!m_rwValue &&               // 未转换为值节点
+		//		!m_rwArray;                 // 未转换为数组节点
+		//}
 
 	private:
 		Niflect::CString m_name;

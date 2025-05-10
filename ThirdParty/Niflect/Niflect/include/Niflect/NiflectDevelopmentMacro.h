@@ -7,3 +7,6 @@
 	//临时屏蔽代码
 	#define TEMP_DISABLED_FOR_REFACTORING_0
 #endif
+
+//改用 std::array 作 arg 数组
+#define USING_STD_ARRAY_TO_FILL_ARGS

@@ -4,9 +4,9 @@
 
 namespace Niflect
 {
-	class CEnumClassAccessor : public CAccessor
+	class CEnumClassAccessor : public CNiflectAccessor
 	{
-		typedef CAccessor inherited;
+		typedef CNiflectAccessor inherited;
 	public:
 		virtual bool SaveInstanceImpl(const InstanceType* base, CRwNode* rw) const override
 		{
@@ -50,13 +50,13 @@ namespace Niflect
 	private:
 		CEnum* GetEnum() const
 		{
-			return CEnum::Cast(inherited::GetType());
+			return CEnum::Cast(inherited::GetOwnerType());
 		}
 	};
 
-	class CEnumBitMaskAccessor : public CAccessor
+	class CEnumBitMaskAccessor : public CNiflectAccessor
 	{
-		typedef CAccessor inherited;
+		typedef CNiflectAccessor inherited;
 	public:
 		virtual bool SaveInstanceImpl(const InstanceType* base, CRwNode* rw) const override
 		{
@@ -71,7 +71,7 @@ namespace Niflect
 	private:
 		CEnum* GetEnum() const
 		{
-			return CEnum::Cast(inherited::GetType());
+			return CEnum::Cast(inherited::GetOwnerType());
 		}
 	};
 }
