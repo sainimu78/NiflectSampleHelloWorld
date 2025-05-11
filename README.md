@@ -1,1 +1,1 @@
-![Build Status](https://github.com/sainimu78/NiflectSamples/actions/workflows/HelloWworldWindows.yml/badge.svg)
+![Build Status](https://github.com/sainimu78/NiflectSampleHelloWorld/actions/workflows/Windows.yml/badge.svg)
