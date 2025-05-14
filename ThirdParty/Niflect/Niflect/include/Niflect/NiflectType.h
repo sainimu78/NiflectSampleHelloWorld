@@ -39,7 +39,10 @@ namespace Niflect
 			: m_table(NULL)
 			, m_tableIdx(INDEX_NONE)
 			, m_typeSize(0)
+#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
 			, m_typeAlignment(0)
+#else
+#endif
 			, m_InvokeDestructorFunc(NULL)
 			, m_BuildTypeMetaFunc(NULL)
 			, m_staticTypePtrAddr(NULL)
@@ -60,7 +63,10 @@ namespace Niflect
 			m_tableIdx = tableIdx;
 			m_nata = nata;
 			m_typeSize = typeSize;
+#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
 			m_typeAlignment = typeAlignment;
+#else
+#endif
 			m_InvokeDestructorFunc = inInvokeDestructorFunc;
 			m_BuildTypeMetaFunc = inBuildTypeMetaFunc;
 			m_staticTypePtrAddr = staticTypePtrAddr;
@@ -85,10 +91,13 @@ namespace Niflect
 		{
 			return m_typeSize;//对于C++ Built in类型, 返回类型为const ref是为了方便赋值类型用auto
 		}
+#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
 		const uint32& GetTypeAlignment() const
 		{
 			return m_typeAlignment;
 		}
+#else
+#endif
 		const HashInt& GetTypeHash() const
 		{
 			return m_typeHash;
@@ -184,7 +193,10 @@ namespace Niflect
 
 	private:
 		uint32 m_typeSize;
+#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
 		uint32 m_typeAlignment;
+#else
+#endif
 		BuildTypeMetaFunc m_BuildTypeMetaFunc;
 		CStaticNiflectTypeAddr* m_staticTypePtrAddr;
 		HashInt m_typeHash;

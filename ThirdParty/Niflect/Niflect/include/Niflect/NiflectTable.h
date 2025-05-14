@@ -26,7 +26,12 @@ namespace Niflect
 			auto shared = Niflect::MakeShared<TInfo>();
 			CNiflectType* type = shared.Get();
 			auto idx = this->GetTypesCount();
-			type->InitTypeMeta(this, idx, sizeof(TType), alignof(TType), &GenericInstanceInvokeDestructor<TType>, typeHash, id, inBuildTypeMetaFunc, staticTypePtrAddr, nata);
+#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
+			auto alignment = alignof(TType);
+#else
+			uint32 alignment = 0;
+#endif
+			type->InitTypeMeta(this, idx, sizeof(TType), alignment, &GenericInstanceInvokeDestructor<TType>, typeHash, id, inBuildTypeMetaFunc, staticTypePtrAddr, nata);
 			if (ctorInfo.m_Func != NULL)
 				type->m_vecConstructorInfo.push_back(ctorInfo);
 			this->InsertType(shared, idx);
