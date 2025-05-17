@@ -29,12 +29,12 @@ namespace NiflectUtil
 			, m_Func(Func)
 		{
 		}
-		CThis& SetMaxDepth(uint32 depth)
+		CThis& SetMaxDepth(Niflect::NifUint32 depth)
 		{
 			m_maxDepth = depth;
 			return *this;
 		}
-		uint32 m_maxDepth;
+		Niflect::NifUint32 m_maxDepth;
 		OnCollectedFunc m_Func;
 	};
 

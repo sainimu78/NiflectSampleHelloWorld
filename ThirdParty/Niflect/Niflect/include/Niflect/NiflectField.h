@@ -19,7 +19,7 @@ namespace Niflect
 		CField()
 			: m_offset(OFFSET_NONE)
 			, m_type(NULL)
-			, m_fieldHash(INVALID_HASH)
+			, m_fieldHash(NifInvalidHash)
 		{
 		}
 		void Init(const Niflect::CString& name, const OffsetType& offset, CNiflectType* type, const CSharedNata& nata, const HashInt& fieldHash)

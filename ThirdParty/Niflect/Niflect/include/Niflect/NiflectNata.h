@@ -19,7 +19,7 @@ namespace Niflect
 	template <typename TDerivedNata>
 	CSharedNata MakeDerivedNata(const TDerivedNata& derived)
 	{
-		//ASSERT(derived._DebugFuncForDynamicCast());//检查是否以 CNata 为基类
+		//NIFLECT_ASSERT(derived._DebugFuncForDynamicCast());//检查是否以 CNata 为基类
 		static_assert(std::is_base_of<CNata, TDerivedNata>::value, "TDerivedNata must be a type derived from CNata");
 		return Niflect::MakeShared<TDerivedNata>(derived);
 	}

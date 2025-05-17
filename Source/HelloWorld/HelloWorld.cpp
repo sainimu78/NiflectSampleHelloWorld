@@ -44,7 +44,7 @@ int main()
 				auto type = Niflect::StaticGetType<CHelloWorld>();
 				type->SaveInstanceToRwNode(&src, &rwSrc);
 				type->LoadInstanceFromRwNode(&dst, &rwSrc);
-				ASSERT(src == dst);
+				assert(src == dst);
 				type->SaveInstanceToRwNode(&dst, &rwDst);
 			}
 			CJsonFormat::Write(&rwDst, ss);

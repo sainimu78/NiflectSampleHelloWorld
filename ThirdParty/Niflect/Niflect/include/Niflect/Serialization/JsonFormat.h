@@ -43,27 +43,27 @@ namespace RwTree
 				ss << std::setprecision(std::numeric_limits<double>::max_digits10) << val;
 				break;
 			default:
-				ASSERT(false);
+				NIFLECT_ASSERT(false);
 				break;
 			}
 			str = ss.str();
 		}
-		static void WriteJsonRecurs(const CRwNode* rwNode, std::ostream& stm, uint32 arrayItemIdx = INDEX_NONE, Niflect::CString strIndent = Niflect::CString())
+		static void WriteJsonRecurs(const CRwNode* rwNode, std::ostream& stm, Niflect::NifUint32 arrayItemIdx = Niflect::NifInvalidIndex, Niflect::CString strIndent = Niflect::CString())
 		{
 			stm << strIndent;
-			if (arrayItemIdx == INDEX_NONE)
+			if (arrayItemIdx == Niflect::NifInvalidIndex)
 			{
 				auto& name = rwNode->GetName();
 				if (!name.empty())
 				{
 					stm << JsonSyntaxPair_StringQuotes[0] << rwNode->GetName() << JsonSyntaxPair_StringQuotes[1];
-					if (arrayItemIdx == INDEX_NONE)
+					if (arrayItemIdx == Niflect::NifInvalidIndex)
 						stm << JsonSyntax_ObjectColon << " ";
 				}
 			}
 			else
 			{
-				ASSERT(rwNode->GetName().empty());
+				NIFLECT_ASSERT(rwNode->GetName().empty());
 			}
 			if (rwNode->IsValue())
 			{
@@ -89,7 +89,7 @@ namespace RwTree
 					//Niflect::CStringStream ss;
 					//ss << std::setprecision(std::numeric_limits<double>::max_digits10) << val;
 					//auto str1 = ss.str();
-					//ASSERT(str0 == str1);
+					//NIFLECT_ASSERT(str0 == str1);
 					//end
 
 					Niflect::CStringStream ss;
@@ -104,7 +104,7 @@ namespace RwTree
 					str = (JsonSyntaxPair_StringQuotes[0] + rwValue->GetString() + JsonSyntaxPair_StringQuotes[1]);
 					break;
 				default:
-					ASSERT(false);
+					NIFLECT_ASSERT(false);
 					break;
 				}
 				stm << str;
@@ -127,10 +127,10 @@ namespace RwTree
 				if (cnt > 0)
 				{
 					strIndent += JsonSyntax_Indent;
-					uint32 idxInc = 0;
-					for (uint32 idx = 0; idx < cnt; ++idx)
+					Niflect::NifUint32 idxInc = 0;
+					for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 					{
-						WriteJsonRecurs(rwNode->GetNode(idx), stm, isArray ? idx : INDEX_NONE, strIndent);
+						WriteJsonRecurs(rwNode->GetNode(idx), stm, isArray ? idx : Niflect::NifInvalidIndex, strIndent);
 						if (idx != cnt - 1)
 							stm << JsonSyntax_ElementDelimiter << std::endl;
 					}
@@ -266,7 +266,7 @@ namespace RwTree
 			if (isFloat)
 			{
 				auto decimalPos = numStr.find('.');
-				ASSERT(decimalPos != std::string::npos);//如失败可能是科学计数格式, 认为有必要则实现解析
+				NIFLECT_ASSERT(decimalPos != std::string::npos);//如失败可能是科学计数格式, 认为有必要则实现解析
 				auto decimalPlaces = numStr.length() - decimalPos - 1;
 				if (decimalPlaces <= std::numeric_limits<float>::max_digits10)
 					rwValue->SetFloat(stof(numStr));

@@ -23,7 +23,7 @@ namespace Niflect
 		{
 			CMemory::SetCurrentAllocator(NULL);
 			for (auto& it : m_vecChunk)
-				Niflect::CDefaultMemory::Free(it.m_mem);
+				CDefaultMemory::Free(it.m_mem);
 		}
 		virtual void* Alloc(size_t size) override
 		{
@@ -34,7 +34,7 @@ namespace Niflect
 			{
 				auto maxChunkSize = sizeUsed > m_chunkSize ? sizeUsed : m_chunkSize;
 				if (maxChunkSize - sizeUsed < size || m_vecChunk.size() == 0)
-					m_vecChunk.push_back({ Niflect::CDefaultMemory::Alloc(size > m_chunkSize ? size : m_chunkSize), 0 });
+					m_vecChunk.push_back({ CDefaultMemory::Alloc(size > m_chunkSize ? size : m_chunkSize), 0 });
 			}
 
 			auto& chunk = m_vecChunk.back();
@@ -54,6 +54,6 @@ namespace Niflect
 		//略显特殊, 因为改变了全局 CMemory 的 allocator, 因此如果动态成员仍用 CMemory 的分配函数, 将导致嵌套执行本类的 Alloc
 		//因此使用 DefaultMemory, 当然使用 CRT 或 std::vector 的默认 Allocator 都是可行的, 只要不用 CMemory 的分配即可
 		std::vector<SChunk, TGenericHeapAllocator<SChunk, CDefaultMemory> > m_vecChunk;
-		const uint32 m_chunkSize;
+		const NifUint32 m_chunkSize;
 	};
 }

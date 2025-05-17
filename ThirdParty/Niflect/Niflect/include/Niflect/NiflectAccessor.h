@@ -146,7 +146,7 @@ namespace Niflect
 	public:
 		void InitMemberMeta(const CString& name, const OffsetType& offset)
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			//m_name = name;
 			m_addrOffset.SetOffset(offset);
 		}
@@ -154,38 +154,38 @@ namespace Niflect
 	public:
 		void InitType(CNiflectType* type)
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			m_type = type;
-			//ASSERT(m_name.empty());
-			ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
+			//NIFLECT_ASSERT(m_name.empty());
+			NIFLECT_ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
 		}
 		void InitForField(const CString& name, const OffsetType& offset)
 		{
-			ASSERT(false);
-			//ASSERT(m_name.empty());
+			NIFLECT_ASSERT(false);
+			//NIFLECT_ASSERT(m_name.empty());
 			//m_name = name;
-			ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
+			NIFLECT_ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
 			m_addrOffset.SetOffset(offset);
 		}
 		void InitForElement()
 		{
-			ASSERT(false);//
-			//ASSERT(m_name.empty());
+			NIFLECT_ASSERT(false);//
+			//NIFLECT_ASSERT(m_name.empty());
 			//m_name = "reserved_dim";
-			ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
+			NIFLECT_ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
 		}
 		void InitElementAccessor(const CSharedAccessor& accessor)
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			//m_elemAccessor = accessor;
 		}
 		void AddChild(const CSharedAccessor& accessor)
 		{
 			this->InsertChild(accessor, this->GetChildrenCount());
 		}
-		void InsertChild(const CSharedAccessor& accessor, uint32 idx)
+		void InsertChild(const CSharedAccessor& accessor, NifUint32 idx)
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			//m_vecChild.insert(m_vecChild.begin() + idx, accessor);
 		}
 
@@ -193,11 +193,11 @@ namespace Niflect
 		void InitType2(CNiflectType* type)
 		{
 			m_type = type;
-			ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
+			NIFLECT_ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
 		}
 		void InitOffset(const OffsetType& offset)
 		{
-			ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
+			NIFLECT_ASSERT(m_addrOffset.GetOffset() == OFFSET_NONE);
 			m_addrOffset.SetOffset(offset);
 		}
 		void InitAddField(const CField& field)
@@ -210,7 +210,7 @@ namespace Niflect
 		}
 
 	private:
-		void InsertField(const CField& field, uint32 idx)
+		void InsertField(const CField& field, NifUint32 idx)
 		{
 			m_vecField.insert(m_vecField.begin() + idx, field);
 		}
@@ -223,33 +223,33 @@ namespace Niflect
 		const CString& GetName() const
 		{
 			//return m_name;
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			static Niflect::CString s_a;
 			return s_a;
 		}
-		uint32 GetChildrenCount() const
+		NifUint32 GetChildrenCount() const
 		{
-			//return static_cast<uint32>(m_vecChild.size());
-			ASSERT(false);
+			//return static_cast<NifUint32>(m_vecChild.size());
+			NIFLECT_ASSERT(false);
 			return 0;
 		}
-		uint32 GetFieldsCount() const
+		NifUint32 GetFieldsCount() const
 		{
-			return static_cast<uint32>(m_vecField.size());
+			return static_cast<NifUint32>(m_vecField.size());
 		}
 		const Niflect::TArrayNif<CField>& GetFields() const
 		{
 			return m_vecField;
 		}
-		CNiflectAccessor* GetChild(uint32 idx) const
+		CNiflectAccessor* GetChild(NifUint32 idx) const
 		{
 			//return m_vecChild[idx].Get();
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			return NULL;
 		}
 		CNiflectAccessor* GetElementAccessor() const
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			//return m_elemAccessor.Get();
 			return NULL;
 		}

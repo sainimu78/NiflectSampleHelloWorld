@@ -6,7 +6,7 @@ namespace RwTree
 {
 	class CBinaryFormat
 	{
-		enum class EBinaryFormatObjectType : uint8
+		enum class EBinaryFormatObjectType : Niflect::NifUint8
 		{
 			Node,
 			Array,
@@ -16,34 +16,34 @@ namespace RwTree
 		struct SSSSSSS
 		{
 			const CRwNode* m_rwNode;
-			uint32 m_ownerId;
+			Niflect::NifUint32 m_ownerId;
 		};
 		//using CIndexingTable = GraphBase::TIndexingMap<SSSSSSS, Niflect::THeapAllocator<GraphBase::TTableItem<SSSSSSS> > >;
 		using aaaaa = Niflect::TArrayNif<SSSSSSS>;
-		static void BuildRecurs(const CRwNode* rwNode, aaaaa& vecNode, const uint32& ownerIndexingId = INDEX_NONE)
+		static void BuildRecurs(const CRwNode* rwNode, aaaaa& vecNode, const Niflect::NifUint32& ownerIndexingId = Niflect::NifInvalidIndex)
 		{
-			auto indexingId = static_cast<uint32>(vecNode.size());
+			auto indexingId = static_cast<Niflect::NifUint32>(vecNode.size());
 			vecNode.push_back({ rwNode, ownerIndexingId });
 
 			auto cnt = rwNode->GetNodesCount();
-			for (uint32 idx = 0; idx < cnt; ++idx)
+			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 				BuildRecurs(rwNode->GetNode(idx), vecNode, indexingId);
 		}
-		static uint32 WriteSectionSizeBegin(std::ostream& stm)
+		static Niflect::NifUint32 WriteSectionSizeBegin(std::ostream& stm)
 		{
-			uint32 sectionSizePos = static_cast<uint32>(stm.tellp());
+			Niflect::NifUint32 sectionSizePos = static_cast<Niflect::NifUint32>(stm.tellp());
 			stm.write(reinterpret_cast<const char*>(&sectionSizePos), sizeof(sectionSizePos));//ռλ
 			return sectionSizePos;
 		}
-		static void WriteSectionSizeEnd(const uint32& sectionSizePos, std::ostream& stm)
+		static void WriteSectionSizeEnd(const Niflect::NifUint32& sectionSizePos, std::ostream& stm)
 		{
-			uint32 currentPos = static_cast<uint32>(stm.tellp());
-			uint32 sectionSize = currentPos - sectionSizePos - sizeof(sectionSizePos);
+			Niflect::NifUint32 currentPos = static_cast<Niflect::NifUint32>(stm.tellp());
+			Niflect::NifUint32 sectionSize = currentPos - sectionSizePos - sizeof(sectionSizePos);
 			stm.seekp(sectionSizePos);
 			stm.write(reinterpret_cast<const char*>(&sectionSize), sizeof(sectionSize));
 			stm.seekp(currentPos);
 		}
-		static void WriteNodesCount(uint32 cnt, std::ostream& stm)
+		static void WriteNodesCount(Niflect::NifUint32 cnt, std::ostream& stm)
 		{
 			stm.write(reinterpret_cast<const char*>(&cnt), sizeof(cnt));
 		}
@@ -62,16 +62,16 @@ namespace RwTree
 			aaaaa vecNode;
 			if (!rwParent->IsValue())
 			{
-				for (uint32 idx = 0; idx < rwParent->GetNodesCount(); ++idx)
+				for (Niflect::NifUint32 idx = 0; idx < rwParent->GetNodesCount(); ++idx)
 					BuildRecurs(rwParent->GetNode(idx), vecNode);
 			}
 
-			uint32 cnt = static_cast<uint32>(vecNode.size());
+			Niflect::NifUint32 cnt = static_cast<Niflect::NifUint32>(vecNode.size());
 			WriteNodesCount(cnt, stm);
-			for (uint32 idx = 0; idx < cnt; ++idx)
+			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 				A_0(vecNode[idx].m_rwNode, stm);
 
-			for (uint32 idx = 0; idx < cnt; ++idx)
+			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 			{
 				auto& item = vecNode[idx];
 				stm.write(reinterpret_cast<const char*>(&item.m_ownerId), sizeof(item.m_ownerId));
@@ -84,20 +84,20 @@ namespace RwTree
 			A_0(rwParent, stm);
 			A_1(rwParent, stm);
 		}
-		static uint32 ReadSectionSize(std::istream& stm)
+		static Niflect::NifUint32 ReadSectionSize(std::istream& stm)
 		{
-			uint32 sectionSize = 0;
+			Niflect::NifUint32 sectionSize = 0;
 			stm.read(reinterpret_cast<char*>(&sectionSize), sizeof(sectionSize));
 			return sectionSize;
 		}
-		static void SkipSectionOfSize(const uint32 sectionSize, std::istream& stm)
+		static void SkipSectionOfSize(const Niflect::NifUint32 sectionSize, std::istream& stm)
 		{
-			uint32 currentPos = static_cast<uint32>(stm.tellg());
+			Niflect::NifUint32 currentPos = static_cast<Niflect::NifUint32>(stm.tellg());
 			stm.seekg(currentPos + sectionSize);
 		}
-		static uint32 ReadNodesCount(std::istream& stm)
+		static Niflect::NifUint32 ReadNodesCount(std::istream& stm)
 		{
-			uint32 cnt = 0;
+			Niflect::NifUint32 cnt = 0;
 			stm.read(reinterpret_cast<char*>(&cnt), sizeof(cnt));
 			return cnt;
 		}
@@ -120,19 +120,19 @@ namespace RwTree
 			auto cnt = ReadNodesCount(stm);
 			Niflect::TArrayNif<CSharedRwNode> vecRwNode;
 			vecRwNode.resize(cnt);
-			for (uint32 idx = 0; idx < cnt; ++idx)
+			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 			{
 				auto rwNode = CreateRwNode();
 				B_0(rwNode.Get(), stm);
 				vecRwNode[idx] = rwNode;
 			}
-			for (uint32 idx = 0; idx < cnt; ++idx)
+			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 			{
-				uint32 ownerId;
+				Niflect::NifUint32 ownerId;
 				stm.read(reinterpret_cast<char*>(&ownerId), sizeof(ownerId));
 
 				auto rwOwner = rwParent;
-				if (ownerId != INDEX_NONE)
+				if (ownerId != Niflect::NifInvalidIndex)
 					rwOwner = vecRwNode[ownerId].Get();
 				rwOwner->AddNode(vecRwNode[idx]);
 			}
@@ -148,7 +148,7 @@ namespace RwTree
 
 			CSharedRwNode rwNode;
 			auto cnt = ReadNodesCount(stm);
-			for (uint32 idx = 0; idx < cnt; ++idx)
+			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 			{
 				auto sectionSize = ReadSectionSize(stm);
 
@@ -178,7 +178,7 @@ namespace RwTree
 
 			{
 				auto& name = rwNode->GetName();
-				auto sz = static_cast<uint32>(name.length());
+				auto sz = static_cast<Niflect::NifUint32>(name.length());
 				stm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
 				if (sz > 0)
 					stm.write(name.c_str(), sz);
@@ -193,7 +193,7 @@ namespace RwTree
 				{
 				case ERwValueType::Bool:
 				{
-					uint8 data = 0;
+					Niflect::NifUint8 data = 0;
 					if (rwValue->GetBool())
 						data = 1;
 					stm.write(reinterpret_cast<char*>(&data), sizeof(data));
@@ -220,14 +220,14 @@ namespace RwTree
 				case ERwValueType::String:
 				{
 					auto& str = rwValue->GetString();
-					auto sz = static_cast<uint32>(str.length());
+					auto sz = static_cast<Niflect::NifUint32>(str.length());
 					stm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
 					if (sz > 0)
 						stm.write(str.c_str(), sz);
 					break;
 				}
 				default:
-					ASSERT(false);
+					NIFLECT_ASSERT(false);
 					break;
 				}
 			}
@@ -247,7 +247,7 @@ namespace RwTree
 
 			{
 				Niflect::CString str;
-				uint32 sz = 0;
+				Niflect::NifUint32 sz = 0;
 				stm.read(reinterpret_cast<char*>(&sz), sizeof(sz));
 				if (sz > 0)
 				{
@@ -268,7 +268,7 @@ namespace RwTree
 				{
 				case ERwValueType::Bool:
 				{
-					uint8 data = 0;
+					Niflect::NifUint8 data = 0;
 					stm.read(reinterpret_cast<char*>(&data), sizeof(data));
 					rwValue->SetBool(data != 0);
 					break;
@@ -289,7 +289,7 @@ namespace RwTree
 				}
 				case ERwValueType::Int32:
 				{
-					int32 data = 0;
+					Niflect::NifInt32 data = 0;
 					stm.read(reinterpret_cast<char*>(&data), sizeof(data));
 					rwValue->SetInt32(data);
 					break;
@@ -297,7 +297,7 @@ namespace RwTree
 				case ERwValueType::String:
 				{
 					Niflect::CString str;
-					uint32 sz = 0;
+					Niflect::NifUint32 sz = 0;
 					stm.read(reinterpret_cast<char*>(&sz), sizeof(sz));
 					if (sz > 0)
 					{
@@ -308,7 +308,7 @@ namespace RwTree
 					break;
 				}
 				default:
-					ASSERT(false);
+					NIFLECT_ASSERT(false);
 					break;
 				}
 				break;
@@ -339,24 +339,24 @@ namespace RwTree
 		//}
 
 	//public:
-	//	static void WriteDataRecurs(const CRwNode2* rwNode, std::ostream& stm, uint32 arrayItemIdx = INDEX_NONE)
+	//	static void WriteDataRecurs(const CRwNode2* rwNode, std::ostream& stm, Niflect::NifUint32 arrayItemIdx = Niflect::NifInvalidIndex)
 	//	{
 	//		auto sectionSizePos = WriteSectionSizeBegin(stm);
 
 	//		auto sectionId = GetSectionType(rwNode);
 	//		stm.write(reinterpret_cast<const char*>(&sectionId), sizeof(sectionId));
 
-	//		if (arrayItemIdx == INDEX_NONE)
+	//		if (arrayItemIdx == Niflect::NifInvalidIndex)
 	//		{
 	//			auto& name = rwNode->GetName();
-	//			auto sz = static_cast<uint32>(name.length());
+	//			auto sz = static_cast<Niflect::NifUint32>(name.length());
 	//			stm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
 	//			if (sz > 0)
 	//				stm.write(name.c_str(), sz);
 	//		}
 	//		else
 	//		{
-	//			ASSERT(rwNode->GetName().empty());
+	//			NIFLECT_ASSERT(rwNode->GetName().empty());
 	//		}
 	//		switch (sectionId)
 	//		{
@@ -396,14 +396,14 @@ namespace RwTree
 	//			case ERwValueType::String:
 	//			{
 	//				auto& str = rwValue->GetString();
-	//				auto sz = static_cast<uint32>(str.length());
+	//				auto sz = static_cast<Niflect::NifUint32>(str.length());
 	//				stm.write(reinterpret_cast<const char*>(&sz), sizeof(sz));
 	//				if (sz > 0)
 	//					stm.write(str.c_str(), sz);
 	//				break;
 	//			}
 	//			default:
-	//				ASSERT(false);
+	//				NIFLECT_ASSERT(false);
 	//				break;
 	//			}
 	//			break;
@@ -411,10 +411,10 @@ namespace RwTree
 	//		case EBinaryFormatObjectType::Array:
 	//		{
 	//			auto rwArray = rwNode->GetArray();
-	//			uint32 idxInc = 0;
+	//			Niflect::NifUint32 idxInc = 0;
 	//			auto cnt = rwArray->GetItemsCount();
 	//			stm.write(reinterpret_cast<const char*>(&cnt), sizeof(cnt));
-	//			for (uint32 idx = 0; idx < cnt; ++idx)
+	//			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 	//				WriteDataRecurs(rwArray->GetItem(idx), stm, idxInc++);
 	//			break;
 	//		}
@@ -422,28 +422,28 @@ namespace RwTree
 	//		{
 	//			auto cnt = rwNode->GetChildrenCount();
 	//			stm.write(reinterpret_cast<const char*>(&cnt), sizeof(cnt));
-	//			for (uint32 idx = 0; idx < cnt; ++idx)
-	//				WriteDataRecurs(rwNode->GetChild(idx), stm, INDEX_NONE);
+	//			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
+	//				WriteDataRecurs(rwNode->GetChild(idx), stm, Niflect::NifInvalidIndex);
 	//			break;
 	//		}
 	//		default:
-	//			ASSERT(false);
+	//			NIFLECT_ASSERT(false);
 	//			break;
 	//		}
 
 	//		WriteSectionSizeEnd(sectionSizePos, stm);
 	//	}
-	//	static void ReadDataRecurs(CRwNode2* rwNode, std::istream& stm, uint32 arrayItemIdx = INDEX_NONE)
+	//	static void ReadDataRecurs(CRwNode2* rwNode, std::istream& stm, Niflect::NifUint32 arrayItemIdx = Niflect::NifInvalidIndex)
 	//	{
 	//		ReadSectionSize(stm);
 
 	//		EBinaryFormatObjectType sectionId;
 	//		stm.read(reinterpret_cast<char*>(&sectionId), sizeof(sectionId));
 
-	//		if (arrayItemIdx == INDEX_NONE)
+	//		if (arrayItemIdx == Niflect::NifInvalidIndex)
 	//		{
 	//			Niflect::CString str;
-	//			uint32 sz = 0;
+	//			Niflect::NifUint32 sz = 0;
 	//			stm.read(reinterpret_cast<char*>(&sz), sizeof(sz));
 	//			if (sz > 0)
 	//			{
@@ -493,7 +493,7 @@ namespace RwTree
 	//			case ERwValueType::String:
 	//			{
 	//				Niflect::CString str;
-	//				uint32 sz = 0;
+	//				Niflect::NifUint32 sz = 0;
 	//				stm.read(reinterpret_cast<char*>(&sz), sizeof(sz));
 	//				if (sz > 0)
 	//				{
@@ -504,7 +504,7 @@ namespace RwTree
 	//				break;
 	//			}
 	//			default:
-	//				ASSERT(false);
+	//				NIFLECT_ASSERT(false);
 	//				break;
 	//			}
 	//			break;
@@ -512,10 +512,10 @@ namespace RwTree
 	//		case EBinaryFormatObjectType::Array:
 	//		{
 	//			auto rwArray = rwNode->ToArray();
-	//			uint32 cnt = 0;
+	//			Niflect::NifUint32 cnt = 0;
 	//			stm.read(reinterpret_cast<char*>(&cnt), sizeof(cnt));
 	//			rwArray->Resize(cnt);
-	//			for (uint32 idx = 0; idx < cnt; ++idx)
+	//			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 	//			{
 	//				auto rwItem = Niflect::MakeShared<CRwNode2>();
 	//				ReadDataRecurs(rwItem.Get(), stm, idx);
@@ -525,19 +525,19 @@ namespace RwTree
 	//		}
 	//		case EBinaryFormatObjectType::Node:
 	//		{
-	//			uint32 cnt = 0;
+	//			Niflect::NifUint32 cnt = 0;
 	//			stm.read(reinterpret_cast<char*>(&cnt), sizeof(cnt));
 	//			rwNode->Resize(cnt);
-	//			for (uint32 idx = 0; idx < cnt; ++idx)
+	//			for (Niflect::NifUint32 idx = 0; idx < cnt; ++idx)
 	//			{
 	//				auto rwChild = Niflect::MakeShared<CRwNode2>();
-	//				ReadDataRecurs(rwChild.Get(), stm, INDEX_NONE);
+	//				ReadDataRecurs(rwChild.Get(), stm, Niflect::NifInvalidIndex);
 	//				rwNode->SetChild(rwChild, idx);
 	//			}
 	//			break;
 	//		}
 	//		default:
-	//			ASSERT(false);
+	//			NIFLECT_ASSERT(false);
 	//			break;
 	//		}
 	//	}

@@ -26,10 +26,10 @@ namespace Niflect
 			auto shared = Niflect::MakeShared<TInfo>();
 			CNiflectType* type = shared.Get();
 			auto idx = this->GetTypesCount();
-#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
+#ifdef NIFLECTDEV_GENERATED_TYPE_ALIGNMENT
 			auto alignment = alignof(TType);
 #else
-			uint32 alignment = 0;
+			NifUint32 alignment = 0;
 #endif
 			type->InitTypeMeta(this, idx, sizeof(TType), alignment, &GenericInstanceInvokeDestructor<TType>, typeHash, id, inBuildTypeMetaFunc, staticTypePtrAddr, nata);
 			if (ctorInfo.m_Func != NULL)
@@ -40,15 +40,15 @@ namespace Niflect
 		template <typename TType, typename TInfo>
 		void RegisterType(const Niflect::CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, const CSharedNata& nata, const InvokeMethodFunc& inInvokeConstructorFunc, const HashInt& typeHash)
 		{
-			ASSERT(!TRegisteredType<TType>::IsValid());
+			NIFLECT_ASSERT(!TRegisteredType<TType>::IsValid());
 			this->RegisterTypeDetailed<TType, TInfo>(id, inBuildTypeMetaFunc, &TRegisteredType<TType>::s_type, nata, CConstructorInfo(inInvokeConstructorFunc, NULL, typeHash, ""), typeHash);
-			ASSERT(TRegisteredType<TType>::IsValid());
+			NIFLECT_ASSERT(TRegisteredType<TType>::IsValid());
 		}
 #else
 		template <typename TInfo, typename TType>
 		void RegisterType(const CString& typeName, const CreateFieldLayoutOfTypeFuncOld& Func)
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			//STypeLifecycleFunctions typeFuncs;
 			//typeFuncs.m_InvokeConstructorFunc = &GenericInstanceInvokeConstructor<TType>;
 			//typeFuncs.m_InvokeDestructorFunc = &GenericInstanceInvokeDestructor<TType>;
@@ -57,16 +57,16 @@ namespace Niflect
 			//auto shared = MakeShared<TInfo>();
 			//auto type = shared.Get();
 			//auto idx = this->AddType(shared);
-			//ASSERT(!TRegisteredType<TType>::IsValid());
+			//NIFLECT_ASSERT(!TRegisteredType<TType>::IsValid());
 			//TRegisteredType<TType>::s_type = type;
 			////type->InitStaticType<TType>();
 			//type->InitTypeMeta(sizeof(TType), CNiflectType::GetTypeHash<TType>(), typeName, idx, typeFuncs);
-			//ASSERT(TRegisteredType<TType>::IsValid());
+			//NIFLECT_ASSERT(TRegisteredType<TType>::IsValid());
 		}
 		template <typename TType, typename TInfo = CNiflectType>
 		void RegisterType2(const Niflect::CString& id, const CreateTypeAccessorFunc& Func)
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			//CTypeInvokations typeFuncs;
 			//typeFuncs.m_InvokeConstructorFunc = &GenericInstanceInvokeConstructor<TType>;
 			//typeFuncs.m_InvokeDestructorFunc = &GenericInstanceInvokeDestructor<TType>;
@@ -75,16 +75,16 @@ namespace Niflect
 			//auto shared = Niflect::MakeShared<TInfo>();
 			//CNiflectType* type = shared.Get();
 			//auto idx = this->AddType(shared);
-			//ASSERT(!TRegisteredType<TType>::IsValid());
+			//NIFLECT_ASSERT(!TRegisteredType<TType>::IsValid());
 			//type->InitTypeMeta2(sizeof(TType), CNiflectType::GetTypeHash<TType>(), idx, typeFuncs, id, &TRegisteredType<TType>::s_type, NULL);
-			//ASSERT(TRegisteredType<TType>::IsValid());
+			//NIFLECT_ASSERT(TRegisteredType<TType>::IsValid());
 		}
 		template <typename TType, typename TInfo>
 		void RegisterTypeDetailed(const Niflect::CString& id, const CreateTypeAccessorFunc& inCreateTypeAccessorFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata, const InvokeConstructorFunc& InvokeConstructorFunc)
 		{
 			STypeLifecycleMeta lifecycleMeta;
 			lifecycleMeta.m_typeSize = sizeof(TType);
-			ASSERT(InvokeConstructorFunc != NULL);
+			NIFLECT_ASSERT(InvokeConstructorFunc != NULL);
 			lifecycleMeta.m_InvokeConstructorFunc = InvokeConstructorFunc;
 			lifecycleMeta.m_InvokeDestructorFunc = &GenericInstanceInvokeDestructor<TType>;
 
@@ -97,9 +97,9 @@ namespace Niflect
 		template <typename TType, typename TInfo>
 		void RegisterTypeChecked(const Niflect::CString& id, const CreateTypeAccessorFunc& inCreateTypeAccessorFunc, const CSharedNata& nata, const InvokeConstructorFunc& InvokeConstructorFunc)
 		{
-			ASSERT(!TRegisteredType<TType>::IsValid());
+			NIFLECT_ASSERT(!TRegisteredType<TType>::IsValid());
 			this->RegisterTypeDetailed<TType, TInfo>(id, inCreateTypeAccessorFunc, &TRegisteredType<TType>::s_type, nata, InvokeConstructorFunc);
-			ASSERT(TRegisteredType<TType>::IsValid());
+			NIFLECT_ASSERT(TRegisteredType<TType>::IsValid());
 		}
 		template <typename TType, typename TInfo>
 		void RegisterType3(const Niflect::CString& id, const CreateTypeAccessorFunc& inCreateTypeAccessorFunc, const CSharedNata& nata)
@@ -111,11 +111,11 @@ namespace Niflect
 		{
 			return m_module;
 		}
-		uint32 GetTypesCount() const
+		NifUint32 GetTypesCount() const
 		{
-			return static_cast<uint32>(m_vecType.size());
+			return static_cast<NifUint32>(m_vecType.size());
 		}
-		CNiflectType* GetTypeByIndex(uint32 idx) const
+		CNiflectType* GetTypeByIndex(NifUint32 idx) const
 		{
 			return m_vecType[idx].Get();
 		}
@@ -127,10 +127,10 @@ namespace Niflect
 			return NULL;
 		}
 		NIFLECT_API void BuildTypesMeta() const;
-		void InsertType(const CSharedNiflectType& type, uint32 idx)
+		void InsertType(const CSharedNiflectType& type, NifUint32 idx)
 		{
 			auto ret = m_mapIdToIndex.insert({ type->GetTypeName(), idx });
-			ASSERT(ret.second);
+			NIFLECT_ASSERT(ret.second);
 			m_vecType.insert(m_vecType.begin() + idx, type);
 		}
 
@@ -138,14 +138,14 @@ namespace Niflect
 		void DeleteType(const CNiflectType* type)//±¸ÓÃ
 		{
 			auto itFound = m_mapIdToIndex.find(type->GetTypeName());
-			ASSERT(itFound != m_mapIdToIndex.end());
+			NIFLECT_ASSERT(itFound != m_mapIdToIndex.end());
 			m_vecType.erase(m_vecType.begin() + itFound->second);
 			m_mapIdToIndex.erase(itFound);
 		}
 
 	private:
 		TArrayNif<CSharedNiflectType> m_vecType;
-		TUnorderedMap<Niflect::CString, uint32> m_mapIdToIndex;
+		TUnorderedMap<Niflect::CString, NifUint32> m_mapIdToIndex;
 		CString m_name;
 		CNiflectModule2* m_module;
 	};

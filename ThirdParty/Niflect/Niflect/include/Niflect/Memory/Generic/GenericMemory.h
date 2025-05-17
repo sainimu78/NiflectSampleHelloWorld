@@ -15,7 +15,7 @@ namespace Niflect
 		//6.内存优化方法调研
 		
 	private:
-		typedef uint64 BytesType;
+		typedef NifUint64 BytesType;
 
 	private:
 		struct SMemoryInfo
@@ -94,7 +94,7 @@ namespace Niflect
 		{
 			if (mem == NULL)
 				return Alloc(size, stats);
-			ASSERT(size != 0);
+			NIFLECT_ASSERT(size != 0);
 			const auto memInfoSize = sizeof(SMemoryInfo);
 			auto actualSize = memInfoSize + size;
 			auto base = static_cast<char*>(mem) - memInfoSize;
@@ -129,9 +129,9 @@ namespace Niflect
 			auto memInfo = reinterpret_cast<SMemoryInfo*>(base);
 			if (stats != NULL)
 			{
-				ASSERT(stats->m_bytesRuntime == memInfo->m_size || stats->m_bytesRuntime > memInfo->m_size);
+				NIFLECT_ASSERT(stats->m_bytesRuntime == memInfo->m_size || stats->m_bytesRuntime > memInfo->m_size);
 				stats->m_bytesRuntime -= memInfo->m_size;
-				ASSERT(stats->m_bytesMemoryInfo == memInfoSize || stats->m_bytesMemoryInfo > memInfoSize);
+				NIFLECT_ASSERT(stats->m_bytesMemoryInfo == memInfoSize || stats->m_bytesMemoryInfo > memInfoSize);
 				stats->m_bytesMemoryInfo -= memInfoSize;
 				stats->m_freeCount++;
 				stats->m_freedBytesRuntimeTotal += memInfo->m_size;

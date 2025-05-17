@@ -328,7 +328,7 @@ template<class K, bool bNoDuplicates,class Pr,class A> inline
 //months.insert("nov");
 //months.insert("dec");
 //StrSet::iterator it = months.find("jul");
-//ASSERT(*it == "jul");
+//NIFLECT_ASSERT(*it == "jul");
 //std::cout << "previous of jul (in alphabetical order) is " << (it[-1]) << std::endl;
 //std::cout << "next of jul (in alphabetical order) is " << (it[1]) << std::endl;
 
@@ -361,10 +361,10 @@ template<class K, bool bNoDuplicates,class Pr,class A> inline
 //vecUnordered.insert(vecUnordered.begin() + std::distance(months.begin(), pos.first), *pos.first);
 //for (size_t idx=0; idx<months.size(); ++idx)
 //{
-//	ASSERT(months[idx] == vecUnordered[idx]);
+//	NIFLECT_ASSERT(months[idx] == vecUnordered[idx]);
 //}
 //StrSet::iterator it = months.find("jul");
-//ASSERT(*it == "jul");
+//NIFLECT_ASSERT(*it == "jul");
 //std::cout << "previous of jul (in alphabetical order) is " << (it[-1]) << std::endl;
 //std::cout << "next of jul (in alphabetical order) is " << (it[1]) << std::endl;
 

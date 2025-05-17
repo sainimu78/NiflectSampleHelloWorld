@@ -33,7 +33,7 @@ namespace Niflect
 	{
 	public:
 		CNiflectRegistration()
-			: m_miscTableIndex(INDEX_NONE)
+			: m_miscTableIndex(NifInvalidIndex)
 		{
 		}
 		~CNiflectRegistration()
@@ -43,7 +43,7 @@ namespace Niflect
 	public:
 		void InitMiscTable()
 		{
-			ASSERT(m_miscTableIndex == INDEX_NONE);
+			NIFLECT_ASSERT(m_miscTableIndex == NifInvalidIndex);
 			m_miscTableIndex = this->GetTablesCount();
 			this->AddNewTable();
 		}
@@ -68,7 +68,7 @@ namespace Niflect
 	//	void InitTypesAccessorTree()
 	//	{
 	//		//#3, 创建AccessorTree, 主要用于序列化
-	//		for (uint32 idx0 = 0; idx0 < this->GetTablesCount(); ++idx0)
+	//		for (NifUint32 idx0 = 0; idx0 < this->GetTablesCount(); ++idx0)
 	//		{
 	//			auto& table = this->GetMutableTable(idx0);
 	//			for (auto& it : table.m_vecType)
@@ -92,11 +92,11 @@ namespace Niflect
 		{
 			m_vecTable.clear();
 		}
-		uint32 GetTablesCount() const
+		NifUint32 GetTablesCount() const
 		{
-			return static_cast<uint32>(m_vecTable.size());
+			return static_cast<NifUint32>(m_vecTable.size());
 		}
-		CNiflectTable* GetMutableTable(uint32 idx)
+		CNiflectTable* GetMutableTable(NifUint32 idx)
 		{
 			return &m_vecTable[idx];
 		}
@@ -140,7 +140,7 @@ namespace Niflect
 
 	private:
 		TArrayNif<CNiflectTable> m_vecTable;
-		uint32 m_miscTableIndex;
+		NifUint32 m_miscTableIndex;
 
 	//private:
 	//	static InitialRegFunc m_InitialRegFunc;
@@ -159,7 +159,7 @@ namespace Niflect
 	//	{
 	//		auto reg = CNiflectRegistration::Get();
 	//		auto& table = reg->GetMutableMiscTable();
-	//		ASSERT(!typeName.empty());
+	//		NIFLECT_ASSERT(!typeName.empty());
 	//		table.RegisterType<CNiflectType, TType>(typeName, &__InternalUseForFunctionPointer<TField, TType>, typeid(TType).hash_code());
 	//	}
 	//	return StaticGetType<TType>();

@@ -4,7 +4,7 @@
 
 namespace NiflectUtil
 {
-	static Niflect::CString DebugIndentToString(uint32 level, const char* singleIndentInString = "-")
+	static Niflect::CString DebugIndentToString(Niflect::NifUint32 level, const char* singleIndentInString = "-")
 	{
 		auto curLevel = level;
 		Niflect::CString strLevel;
