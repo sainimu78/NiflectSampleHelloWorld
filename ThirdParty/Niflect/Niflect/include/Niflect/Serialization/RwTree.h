@@ -5,7 +5,7 @@
 
 namespace RwTree
 {
-	enum class ERwValueType : uint8
+	enum class ERwValueType : Niflect::NifUint8
 	{
 		None,
 		Bool,
@@ -52,69 +52,69 @@ namespace RwTree
 		{
 			return this->GetBuiltInValue<ERwValueType::Bool, bool>();
 		}
-		void SetInt8(const int8& val)
+		void SetInt8(const Niflect::NifInt8& val)
 		{
 			this->SetBuiltInValue<ERwValueType::Int8>(val);
 		}
-		const int8& GetInt8() const
+		const Niflect::NifInt8& GetInt8() const
 		{
-			return this->GetBuiltInValue<ERwValueType::Int8, int8>();
+			return this->GetBuiltInValue<ERwValueType::Int8, Niflect::NifInt8>();
 		}
-		void SetInt16(const int16& val)
+		void SetInt16(const Niflect::NifInt16& val)
 		{
 			this->SetBuiltInValue<ERwValueType::Int16>(val);
 		}
-		const int16& GetInt16() const
+		const Niflect::NifInt16& GetInt16() const
 		{
-			return this->GetBuiltInValue<ERwValueType::Int16, int16>();
+			return this->GetBuiltInValue<ERwValueType::Int16, Niflect::NifInt16>();
 		}
-		void SetInt32(const int32& val)
+		void SetInt32(const Niflect::NifInt32& val)
 		{
 			this->SetBuiltInValue<ERwValueType::Int32>(val);
 		}
-		const int32& GetInt32() const
+		const Niflect::NifInt32& GetInt32() const
 		{
-			return this->GetBuiltInValue<ERwValueType::Int32, int32>();
+			return this->GetBuiltInValue<ERwValueType::Int32, Niflect::NifInt32>();
 		}
-		void SetInt64(const int64& val)
+		void SetInt64(const Niflect::NifInt64& val)
 		{
 			this->SetBuiltInValue<ERwValueType::Int64>(val);
 		}
-		const int64& GetInt64() const
+		const Niflect::NifInt64& GetInt64() const
 		{
-			return this->GetBuiltInValue<ERwValueType::Int64, int64>();
+			return this->GetBuiltInValue<ERwValueType::Int64, Niflect::NifInt64>();
 		}
-		void SetUint8(const uint8& val)
+		void SetUint8(const Niflect::NifUint8& val)
 		{
 			this->SetBuiltInValue<ERwValueType::Uint8>(val);
 		}
-		const uint8& GetUint8() const
+		const Niflect::NifUint8& GetUint8() const
 		{
-			return this->GetBuiltInValue<ERwValueType::Uint8, uint8>();
+			return this->GetBuiltInValue<ERwValueType::Uint8, Niflect::NifUint8>();
 		}
-		void SetUint16(const uint16& val)
+		void SetUint16(const Niflect::NifUint16& val)
 		{
 			this->SetBuiltInValue<ERwValueType::Uint16>(val);
 		}
-		const uint16& GetUint16() const
+		const Niflect::NifUint16& GetUint16() const
 		{
-			return this->GetBuiltInValue<ERwValueType::Uint16, uint16>();
+			return this->GetBuiltInValue<ERwValueType::Uint16, Niflect::NifUint16>();
 		}
-		void SetUint32(const uint32& val)
+		void SetUint32(const Niflect::NifUint32& val)
 		{
 			this->SetBuiltInValue<ERwValueType::Uint32>(val);
 		}
-		const uint32& GetUint32() const
+		const Niflect::NifUint32& GetUint32() const
 		{
-			return this->GetBuiltInValue<ERwValueType::Uint32, uint32>();
+			return this->GetBuiltInValue<ERwValueType::Uint32, Niflect::NifUint32>();
 		}
-		void SetUint64(const uint64& val)
+		void SetUint64(const Niflect::NifUint64& val)
 		{
 			this->SetBuiltInValue<ERwValueType::Uint64>(val);
 		}
-		const uint64& GetUint64() const
+		const Niflect::NifUint64& GetUint64() const
 		{
-			return this->GetBuiltInValue<ERwValueType::Uint64, uint64>();
+			return this->GetBuiltInValue<ERwValueType::Uint64, Niflect::NifUint64>();
 		}
 		void SetFloat(const float& val)
 		{
@@ -139,7 +139,7 @@ namespace RwTree
 		}
 		const Niflect::CString& GetString() const
 		{
-			ASSERT(m_type == ERwValueType::String);
+			NIFLECT_ASSERT(m_type == ERwValueType::String);
 			return m_data;
 		}
 
@@ -149,7 +149,7 @@ namespace RwTree
 			m_type = ERwValueType::RawData;
 			m_data = val;
 		}
-		void SetRawData(const void* src, uint32 size)
+		void SetRawData(const void* src, Niflect::NifUint32 size)
 		{
 			m_type = ERwValueType::RawData;
 			m_data.resize(size);
@@ -157,7 +157,7 @@ namespace RwTree
 		}
 		const CRwRawData& GetRawData() const
 		{
-			ASSERT(m_type == ERwValueType::RawData);
+			NIFLECT_ASSERT(m_type == ERwValueType::RawData);
 			return m_data;
 		}
 
@@ -173,7 +173,7 @@ namespace RwTree
 		template <ERwValueType TEnumType, typename TValue>
 		inline const TValue& GetBuiltInValue() const
 		{
-			ASSERT(m_type == TEnumType);
+			NIFLECT_ASSERT(m_type == TEnumType);
 			return *reinterpret_cast<TValue*>(&m_data[0]);
 		}
 
@@ -194,82 +194,82 @@ namespace RwTree
 		return this->GetBool();
 	}
 	template <>
-	inline void CRwValue::SetAs<int8>(const int8& val)
+	inline void CRwValue::SetAs<Niflect::NifInt8>(const Niflect::NifInt8& val)
 	{
 		return this->SetInt8(val);
 	}
 	template <>
-	inline const int8& CRwValue::GetAs<int8>() const
+	inline const Niflect::NifInt8& CRwValue::GetAs<Niflect::NifInt8>() const
 	{
 		return this->GetInt8();
 	}
 	template <>
-	inline void CRwValue::SetAs<int16>(const int16& val)
+	inline void CRwValue::SetAs<Niflect::NifInt16>(const Niflect::NifInt16& val)
 	{
 		return this->SetInt16(val);
 	}
 	template <>
-	inline const int16& CRwValue::GetAs<int16>() const
+	inline const Niflect::NifInt16& CRwValue::GetAs<Niflect::NifInt16>() const
 	{
 		return this->GetInt16();
 	}
 	template <>
-	inline void CRwValue::SetAs<int32>(const int32& val)
+	inline void CRwValue::SetAs<Niflect::NifInt32>(const Niflect::NifInt32& val)
 	{
 		return this->SetInt32(val);
 	}
 	template <>
-	inline const int32& CRwValue::GetAs<int32>() const
+	inline const Niflect::NifInt32& CRwValue::GetAs<Niflect::NifInt32>() const
 	{
 		return this->GetInt32();
 	}
 	template <>
-	inline void CRwValue::SetAs<int64>(const int64& val)
+	inline void CRwValue::SetAs<Niflect::NifInt64>(const Niflect::NifInt64& val)
 	{
 		return this->SetInt64(val);
 	}
 	template <>
-	inline const int64& CRwValue::GetAs<int64>() const
+	inline const Niflect::NifInt64& CRwValue::GetAs<Niflect::NifInt64>() const
 	{
 		return this->GetInt64();
 	}
 	template <>
-	inline void CRwValue::SetAs<uint8>(const uint8& val)
+	inline void CRwValue::SetAs<Niflect::NifUint8>(const Niflect::NifUint8& val)
 	{
 		return this->SetUint8(val);
 	}
 	template <>
-	inline const uint8& CRwValue::GetAs<uint8>() const
+	inline const Niflect::NifUint8& CRwValue::GetAs<Niflect::NifUint8>() const
 	{
 		return this->GetUint8();
 	}
 	template <>
-	inline void CRwValue::SetAs<uint16>(const uint16& val)
+	inline void CRwValue::SetAs<Niflect::NifUint16>(const Niflect::NifUint16& val)
 	{
 		return this->SetUint16(val);
 	}
 	template <>
-	inline const uint16& CRwValue::GetAs<uint16>() const
+	inline const Niflect::NifUint16& CRwValue::GetAs<Niflect::NifUint16>() const
 	{
 		return this->GetUint16();
 	}
 	template <>
-	inline void CRwValue::SetAs<uint32>(const uint32& val)
+	inline void CRwValue::SetAs<Niflect::NifUint32>(const Niflect::NifUint32& val)
 	{
 		return this->SetUint32(val);
 	}
 	template <>
-	inline const uint32& CRwValue::GetAs<uint32>() const
+	inline const Niflect::NifUint32& CRwValue::GetAs<Niflect::NifUint32>() const
 	{
 		return this->GetUint32();
 	}
 	template <>
-	inline void CRwValue::SetAs<uint64>(const uint64& val)
+	inline void CRwValue::SetAs<Niflect::NifUint64>(const Niflect::NifUint64& val)
 	{
 		return this->SetUint64(val);
 	}
 	template <>
-	inline const uint64& CRwValue::GetAs<uint64>() const
+	inline const Niflect::NifUint64& CRwValue::GetAs<Niflect::NifUint64>() const
 	{
 		return this->GetUint64();
 	}
@@ -319,7 +319,7 @@ namespace RwTree
 		{
 			this->InsertItem(item, this->GetItemsCount());
 		}
-		void InsertItem(const CSharedRwNode& item, uint32 idx)
+		void InsertItem(const CSharedRwNode& item, Niflect::NifUint32 idx)
 		{
 			m_vecItem.insert(m_vecItem.begin() + idx, item);
 		}
@@ -345,7 +345,7 @@ namespace RwTree
 			auto rwValue = this->AddItemValue();
 			rwValue->SetBool(value);
 		}
-		void AddItemInt32(int32 value)
+		void AddItemInt32(Niflect::NifInt32 value)
 		{
 			auto rwValue = this->AddItemValue();
 			rwValue->SetInt32(value);
@@ -360,23 +360,23 @@ namespace RwTree
 			auto rwValue = this->AddItemValue();
 			rwValue->SetString(value);
 		}
-		void SetItem(const CSharedRwNode& item, uint32 idx)
+		void SetItem(const CSharedRwNode& item, Niflect::NifUint32 idx)
 		{
 			m_vecItem[idx] = item;
 		}
-		CRwNode* GetItem(uint32 idx) const
+		CRwNode* GetItem(Niflect::NifUint32 idx) const
 		{
 			return m_vecItem[idx].Get();
 		}
-		uint32 GetItemsCount() const
+		Niflect::NifUint32 GetItemsCount() const
 		{
-			return static_cast<uint32>(m_vecItem.size());
+			return static_cast<Niflect::NifUint32>(m_vecItem.size());
 		}
-		void Resize(uint32 cnt)
+		void Resize(Niflect::NifUint32 cnt)
 		{
 			m_vecItem.resize(cnt);
 		}
-		void DeleteItem(uint32 idx)
+		void DeleteItem(Niflect::NifUint32 idx)
 		{
 			m_vecItem.erase(m_vecItem.begin() + idx);
 		}
@@ -423,7 +423,7 @@ namespace RwTree
 		{
 			this->InsertNode(node, this->GetNodesCount());
 		}
-		void InsertNode(const CSharedRwNode& node, uint32 idx)
+		void InsertNode(const CSharedRwNode& node, Niflect::NifUint32 idx)
 		{
 			m_vecNode.insert(m_vecNode.begin() + idx, node);
 		}
@@ -436,11 +436,11 @@ namespace RwTree
 			}
 			return NULL;
 		}
-		void Resize(uint32 cnt)
+		void Resize(Niflect::NifUint32 cnt)
 		{
 			m_vecNode.resize(cnt);
 		}
-		void Delete(uint32 idx)
+		void Delete(Niflect::NifUint32 idx)
 		{
 			m_vecNode.erase(m_vecNode.begin() + idx);
 		}
@@ -453,27 +453,27 @@ namespace RwTree
 		{
 			m_vecNode.clear();
 		}
-		void SetNode(const CSharedRwNode& rwNode, uint32 idx)
+		void SetNode(const CSharedRwNode& rwNode, Niflect::NifUint32 idx)
 		{
 			m_vecNode[idx] = rwNode;
 		}
-		CRwNode* GetNode(uint32 idx) const
+		CRwNode* GetNode(Niflect::NifUint32 idx) const
 		{
 			return m_vecNode[idx].Get();
 		}
-		CSharedRwNode GetSharedNode(uint32 idx) const
+		CSharedRwNode GetSharedNode(Niflect::NifUint32 idx) const
 		{
 			return m_vecNode[idx];
 		}
-		uint32 GetNodesCount() const
+		Niflect::NifUint32 GetNodesCount() const
 		{
-			return static_cast<uint32>(m_vecNode.size());
+			return static_cast<Niflect::NifUint32>(m_vecNode.size());
 		}
 		CRwValue* ToValue()
 		{
 			if (m_rwValue == NULL)
 			{
-				ASSERT(m_rwArray == NULL);
+				NIFLECT_ASSERT(m_rwArray == NULL);
 				m_rwArray = NULL;
 				m_rwValue = Niflect::MakeShared<CRwValue>(m_data, m_valueType);
 			}
@@ -487,7 +487,7 @@ namespace RwTree
 		{
 			if (m_rwArray == NULL)
 			{
-				ASSERT(m_rwValue == NULL);
+				NIFLECT_ASSERT(m_rwValue == NULL);
 				m_rwValue = NULL;
 				m_rwArray = Niflect::MakeShared<CRwArray>(m_data, m_vecNode);
 			}
@@ -694,37 +694,37 @@ namespace RwTree
 	{
 		return FindRwValueAs<bool>(rwParent, name, defaultValue);
 	}
-	static int8 FindRwInt8(const CRwNode* rwParent, const Niflect::CString& name, int8 defaultValue = 0)
+	static Niflect::NifInt8 FindRwInt8(const CRwNode* rwParent, const Niflect::CString& name, Niflect::NifInt8 defaultValue = 0)
 	{
-		return FindRwValueAs<int8>(rwParent, name, defaultValue);
+		return FindRwValueAs<Niflect::NifInt8>(rwParent, name, defaultValue);
 	}
-	static int16 FindRwInt16(const CRwNode* rwParent, const Niflect::CString& name, int16 defaultValue = 0)
+	static Niflect::NifInt16 FindRwInt16(const CRwNode* rwParent, const Niflect::CString& name, Niflect::NifInt16 defaultValue = 0)
 	{
-		return FindRwValueAs<int16>(rwParent, name, defaultValue);
+		return FindRwValueAs<Niflect::NifInt16>(rwParent, name, defaultValue);
 	}
-	static int32 FindRwInt32(const CRwNode* rwParent, const Niflect::CString& name, int32 defaultValue = 0)
+	static Niflect::NifInt32 FindRwInt32(const CRwNode* rwParent, const Niflect::CString& name, Niflect::NifInt32 defaultValue = 0)
 	{
-		return FindRwValueAs<int32>(rwParent, name, defaultValue);
+		return FindRwValueAs<Niflect::NifInt32>(rwParent, name, defaultValue);
 	}
-	static int64 FindRwInt64(const CRwNode* rwParent, const Niflect::CString& name, int64 defaultValue = 0)
+	static Niflect::NifInt64 FindRwInt64(const CRwNode* rwParent, const Niflect::CString& name, Niflect::NifInt64 defaultValue = 0)
 	{
-		return FindRwValueAs<int64>(rwParent, name, defaultValue);
+		return FindRwValueAs<Niflect::NifInt64>(rwParent, name, defaultValue);
 	}
-	static uint8 FindRwUint8(const CRwNode* rwParent, const Niflect::CString& name, uint8 defaultValue = 0u)
+	static Niflect::NifUint8 FindRwUint8(const CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint8 defaultValue = 0u)
 	{
-		return FindRwValueAs<uint8>(rwParent, name, defaultValue);
+		return FindRwValueAs<Niflect::NifUint8>(rwParent, name, defaultValue);
 	}
-	static uint16 FindRwUint16(const CRwNode* rwParent, const Niflect::CString& name, uint16 defaultValue = 0u)
+	static Niflect::NifUint16 FindRwUint16(const CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint16 defaultValue = 0u)
 	{
-		return FindRwValueAs<uint16>(rwParent, name, defaultValue);
+		return FindRwValueAs<Niflect::NifUint16>(rwParent, name, defaultValue);
 	}
-	static uint32 FindRwUint32(const CRwNode* rwParent, const Niflect::CString& name, uint32 defaultValue = 0u)
+	static Niflect::NifUint32 FindRwUint32(const CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint32 defaultValue = 0u)
 	{
-		return FindRwValueAs<uint32>(rwParent, name, defaultValue);
+		return FindRwValueAs<Niflect::NifUint32>(rwParent, name, defaultValue);
 	}
-	static uint64 FindRwUint64(const CRwNode* rwParent, const Niflect::CString& name, uint64 defaultValue = 0u)
+	static Niflect::NifUint64 FindRwUint64(const CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint64 defaultValue = 0u)
 	{
-		return FindRwValueAs<uint64>(rwParent, name, defaultValue);
+		return FindRwValueAs<Niflect::NifUint64>(rwParent, name, defaultValue);
 	}
 	static float FindRwFloat(const CRwNode* rwParent, const Niflect::CString& name, float defaultValue = 0.0f)
 	{
@@ -740,14 +740,14 @@ namespace RwTree
 			return rwValue->GetRawData();
 		return CRwRawData();
 	}
-	static uint32 GetRwNodesCount(const CRwNode* rwParent)
+	static Niflect::NifUint32 GetRwNodesCount(const CRwNode* rwParent)
 	{
-		uint32 count = 0;
+		Niflect::NifUint32 count = 0;
 		if (rwParent != NULL)
 			count = rwParent->GetNodesCount();
 		return count;
 	}
-	static CRwNode* GetRwNode(const CRwNode* rwParent, uint32 idx)
+	static CRwNode* GetRwNode(const CRwNode* rwParent, Niflect::NifUint32 idx)
 	{
 		CRwNode* node = NULL;
 		if (rwParent != NULL)
@@ -766,18 +766,18 @@ namespace RwTree
 			return rwNode->ToValue();
 		return NULL;
 	}
-	static uint32 GetRwItemsCount(const CRwArray* rwArray)
+	static Niflect::NifUint32 GetRwItemsCount(const CRwArray* rwArray)
 	{
-		uint32 count = 0;
+		Niflect::NifUint32 count = 0;
 		if (rwArray != NULL)
 			count = rwArray->GetItemsCount();
 		return count;
 	}
-	static bool AddExistingRwNode(CRwNode* rwParent, const Niflect::CString& name, const CSharedRwNode& shared, uint32* insertedIndex = NULL)
+	static bool AddExistingRwNode(CRwNode* rwParent, const Niflect::CString& name, const CSharedRwNode& shared, Niflect::NifUint32* insertedIndex = NULL)
 	{
 		if (rwParent != NULL)
 		{
-			ASSERT(shared->GetName().empty());
+			NIFLECT_ASSERT(shared->GetName().empty());
 			shared->SetName(name);
 			if (insertedIndex != NULL)
 				*insertedIndex = rwParent->GetNodesCount();
@@ -786,10 +786,10 @@ namespace RwTree
 		}
 		return false;
 	}
-	static CRwNode* AddRwNode(CRwNode* rwParent, const Niflect::CString& name, uint32* insertedIndex = NULL)
+	static CRwNode* AddRwNode(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint32* insertedIndex = NULL)
 	{
 		auto shared = CreateRwNode();
-		uint32 idx = INDEX_NONE;
+		Niflect::NifUint32 idx = Niflect::NifInvalidIndex;
 		if (AddExistingRwNode(rwParent, name, shared, &idx))
 		{
 			if (insertedIndex != NULL)
@@ -798,11 +798,11 @@ namespace RwTree
 		}
 		return NULL;
 	}
-	static CRwArray* AddRwArray(CRwNode* rwParent, const Niflect::CString& name, uint32* insertedIndex = NULL)
+	static CRwArray* AddRwArray(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint32* insertedIndex = NULL)
 	{
 		return AddRwNode(rwParent, name, insertedIndex)->ToArray();
 	}
-	static CRwValue* AddRwValue(CRwNode* rwParent, const Niflect::CString& name, uint32* insertedIndex = NULL)
+	static CRwValue* AddRwValue(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint32* insertedIndex = NULL)
 	{
 		return AddRwNode(rwParent, name, insertedIndex)->ToValue();
 	}
@@ -816,37 +816,37 @@ namespace RwTree
 	{
 		AddRwValueAs<bool>(rwParent, name, value);
 	}
-	static void AddRwInt8(CRwNode* rwParent, const Niflect::CString& name, int8 value)
+	static void AddRwInt8(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifInt8 value)
 	{
-		AddRwValueAs<int8>(rwParent, name, value);
+		AddRwValueAs<Niflect::NifInt8>(rwParent, name, value);
 	}
-	static void AddRwInt16(CRwNode* rwParent, const Niflect::CString& name, int16 value)
+	static void AddRwInt16(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifInt16 value)
 	{
-		AddRwValueAs<int16>(rwParent, name, value);
+		AddRwValueAs<Niflect::NifInt16>(rwParent, name, value);
 	}
-	static void AddRwInt32(CRwNode* rwParent, const Niflect::CString& name, int32 value)
+	static void AddRwInt32(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifInt32 value)
 	{
-		AddRwValueAs<int32>(rwParent, name, value);
+		AddRwValueAs<Niflect::NifInt32>(rwParent, name, value);
 	}
-	static void AddRwInt64(CRwNode* rwParent, const Niflect::CString& name, int64 value)
+	static void AddRwInt64(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifInt64 value)
 	{
-		AddRwValueAs<int64>(rwParent, name, value);
+		AddRwValueAs<Niflect::NifInt64>(rwParent, name, value);
 	}
-	static void AddRwUint8(CRwNode* rwParent, const Niflect::CString& name, uint8 value)
+	static void AddRwUint8(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint8 value)
 	{
-		AddRwValueAs<uint8>(rwParent, name, value);
+		AddRwValueAs<Niflect::NifUint8>(rwParent, name, value);
 	}
-	static void AddRwUint16(CRwNode* rwParent, const Niflect::CString& name, uint16 value)
+	static void AddRwUint16(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint16 value)
 	{
-		AddRwValueAs<uint16>(rwParent, name, value);
+		AddRwValueAs<Niflect::NifUint16>(rwParent, name, value);
 	}
-	static void AddRwUint32(CRwNode* rwParent, const Niflect::CString& name, uint32 value)
+	static void AddRwUint32(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint32 value)
 	{
-		AddRwValueAs<uint32>(rwParent, name, value);
+		AddRwValueAs<Niflect::NifUint32>(rwParent, name, value);
 	}
-	static void AddRwUint64(CRwNode* rwParent, const Niflect::CString& name, uint64 value)
+	static void AddRwUint64(CRwNode* rwParent, const Niflect::CString& name, Niflect::NifUint64 value)
 	{
-		AddRwValueAs<uint64>(rwParent, name, value);
+		AddRwValueAs<Niflect::NifUint64>(rwParent, name, value);
 	}
 	static void AddRwFloat(CRwNode* rwParent, const Niflect::CString& name, float value)
 	{
@@ -860,7 +860,7 @@ namespace RwTree
 	{
 		AddRwValueAs<Niflect::CString>(rwParent, name, value);
 	}
-	static void AddRwRawData(CRwNode* rwParent, const Niflect::CString& name, const void* data, uint32 size)
+	static void AddRwRawData(CRwNode* rwParent, const Niflect::CString& name, const void* data, Niflect::NifUint32 size)
 	{
 		if (auto rwValue = AddRwValue(rwParent, name))
 			rwValue->SetRawData(data, size);
@@ -915,7 +915,7 @@ namespace RwTree
 		}
 	}
 
-	//static void DebugPrintRecurs(const CRwNode& rwNode, uint32 arrayItemIdx = INDEX_NONE, uint32 level = 0)
+	//static void DebugPrintRecurs(const CRwNode& rwNode, Niflect::NifUint32 arrayItemIdx = INDEX_NONE, Niflect::NifUint32 level = 0)
 	//{
 	//	auto strLevel = NiflectUtil::DebugIndentToString(level);
 	//	printf("%s", strLevel.c_str());
@@ -925,7 +925,7 @@ namespace RwTree
 	//	}
 	//	else
 	//	{
-	//		ASSERT(rwNode->GetName().empty());
+	//		NIFLECT_ASSERT(rwNode->GetName().empty());
 	//		printf("[%u]", arrayItemIdx);
 	//	}
 	//	if (rwNode->IsValue())
@@ -953,7 +953,7 @@ namespace RwTree
 	//			str = rwValue->GetString().c_str();
 	//			break;
 	//		default:
-	//			ASSERT(false);
+	//			NIFLECT_ASSERT(false);
 	//			break;
 	//		}
 	//		printf("%s", str.c_str());
@@ -964,34 +964,34 @@ namespace RwTree
 	//		level++;
 	//		printf("\n");
 	//		auto rwArray = rwNode->GetArray();
-	//		uint32 idxInc = 0;
-	//		for (uint32 idx = 0; idx < rwArray->GetItemsCount(); ++idx)
+	//		Niflect::NifUint32 idxInc = 0;
+	//		for (Niflect::NifUint32 idx = 0; idx < rwArray->GetItemsCount(); ++idx)
 	//			DebugPrintRecurs(rwArray->GetItem(idx), idxInc++, level);
 	//	}
 	//	else
 	//	{
 	//		level++;
 	//		printf("\n");
-	//		for (uint32 idx = 0; idx < rwNode->GetNodesCount(); ++idx)
+	//		for (Niflect::NifUint32 idx = 0; idx < rwNode->GetNodesCount(); ++idx)
 	//			DebugPrintRecurs(rwNode->GetNode(idx), INDEX_NONE, level);
 	//	}
 	//}
-	static void DebugPrintRecurs2(const CRwNode* rwNode, uint32 arrayItemIdx = INDEX_NONE, uint32 level = 0)
+	static void DebugPrintRecurs2(const CRwNode* rwNode, Niflect::NifUint32 arrayItemIdx = Niflect::NifInvalidIndex, Niflect::NifUint32 level = 0)
 	{
 		auto strLevel = NiflectUtil::DebugIndentToString(level);
 		NiflectUtil::Printf("%s", strLevel.c_str());
-		if (arrayItemIdx == INDEX_NONE)
+		if (arrayItemIdx == Niflect::NifInvalidIndex)
 		{
 			NiflectUtil::Printf("%s", rwNode->GetName().c_str());
 		}
 		else
 		{
-			ASSERT(rwNode->GetName().empty());
+			NIFLECT_ASSERT(rwNode->GetName().empty());
 			NiflectUtil::Printf("[%u]", arrayItemIdx);
 		}
 		if (rwNode->IsValue())
 		{
-			if (arrayItemIdx == INDEX_NONE)
+			if (arrayItemIdx == Niflect::NifInvalidIndex)
 				NiflectUtil::Printf(", ");
 
 			Niflect::CString str;
@@ -1035,7 +1035,7 @@ namespace RwTree
 				str = rwValue->GetString().c_str();
 				break;
 			default:
-				ASSERT(false);
+				NIFLECT_ASSERT(false);
 				break;
 			}
 			NiflectUtil::Printf("%s", str.c_str());
@@ -1045,8 +1045,8 @@ namespace RwTree
 		{
 			level++;
 			NiflectUtil::Printf("\n");
-			for (uint32 idx = 0; idx < rwNode->GetNodesCount(); ++idx)
-				DebugPrintRecurs2(rwNode->GetNode(idx), rwNode->IsArray() ? idx : INDEX_NONE, level);
+			for (Niflect::NifUint32 idx = 0; idx < rwNode->GetNodesCount(); ++idx)
+				DebugPrintRecurs2(rwNode->GetNode(idx), rwNode->IsArray() ? idx : Niflect::NifInvalidIndex, level);
 		}
 	}
 	static void DebugPrintTestTree()

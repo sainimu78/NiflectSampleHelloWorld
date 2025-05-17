@@ -28,17 +28,17 @@ namespace Niflect
 	{
 	public:
 		NIFLECT_API bool RegisterStaticlyLoadedModule(const Niflect::CString& moduleName);
-		uint32 GetModulesCount() const
+		NifUint32 GetModulesCount() const
 		{
-			return static_cast<uint32>(m_vecModule.size());
+			return static_cast<NifUint32>(m_vecModule.size());
 		}
-		const CNiflectModule& GetModule(uint32 idx) const
+		const CNiflectModule& GetModule(NifUint32 idx) const
 		{
 			return m_vecModule[idx];
 		}
 
 	private:
 		Niflect::TArrayNif<CNiflectModule> m_vecModule;
-		Niflect::TMap<Niflect::CString, uint32> m_mapNameToIdx;
+		Niflect::TMap<Niflect::CString, NifUint32> m_mapNameToIdx;
 	};
 }

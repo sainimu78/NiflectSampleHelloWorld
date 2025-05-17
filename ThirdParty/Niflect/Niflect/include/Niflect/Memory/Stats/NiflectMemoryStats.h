@@ -39,13 +39,13 @@ namespace Niflect
 			//因此结论是, 为使CMemoryTest最先执行完构造函数, 其它静态变量创建也需要用CDefaultMemory, 不用new
 			//如果用new, 则需要保证不在new执行完后调用CDefaultMemory::Alloc
 			//更好的办法是统一使用CDefaultMemory后, TSingletonPtr也支持CDefaultMemory, CMemoryTest不纳入管控则用new即可
-			ASSERT(m_bytesRuntime == 0);
-			ASSERT(m_bytesMemoryInfo == 0);
-			ASSERT(m_allocCount == m_freeCount);
-			ASSERT(m_allocatedBytesRuntimeTotal == m_freedBytesRuntimeTotal);
-			ASSERT(m_allocatedBytesTotal == m_freedBytesTotal);
-			ASSERT(m_allocatedBytesTotal == 0 || m_allocatedBytesTotal > m_allocatedBytesRuntimeTotal);
-			ASSERT(m_freedBytesTotal == 0 || m_freedBytesTotal > m_freedBytesRuntimeTotal);
+			NIFLECT_ASSERT(m_bytesRuntime == 0);
+			NIFLECT_ASSERT(m_bytesMemoryInfo == 0);
+			NIFLECT_ASSERT(m_allocCount == m_freeCount);
+			NIFLECT_ASSERT(m_allocatedBytesRuntimeTotal == m_freedBytesRuntimeTotal);
+			NIFLECT_ASSERT(m_allocatedBytesTotal == m_freedBytesTotal);
+			NIFLECT_ASSERT(m_allocatedBytesTotal == 0 || m_allocatedBytesTotal > m_allocatedBytesRuntimeTotal);
+			NIFLECT_ASSERT(m_freedBytesTotal == 0 || m_freedBytesTotal > m_freedBytesRuntimeTotal);
 		}
 		size_t m_bytesRuntime;
 		size_t m_bytesMemoryInfo;
@@ -81,7 +81,7 @@ namespace Niflect
 			{
 				CMemoryStats* placeholder;
 				TMemory::PushStats(m_parentScope.m_lastStats, placeholder);
-				ASSERT(placeholder == &m_parentScope.m_stats);
+				NIFLECT_ASSERT(placeholder == &m_parentScope.m_stats);
 			}
 			~CDisabled()
 			{

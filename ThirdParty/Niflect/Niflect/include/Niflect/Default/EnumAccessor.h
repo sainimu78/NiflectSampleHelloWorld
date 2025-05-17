@@ -14,14 +14,14 @@ namespace Niflect
 
 			auto et = this->GetEnum();
 			auto rwValue = rw->ToValue();
-			uint32 idx = INDEX_NONE;
+			NifUint32 idx = NifInvalidIndex;
 			switch (et->GetTypeSize())
 			{
-			case 1: idx = *static_cast<const uint8*>(base); break;
-			case 2: idx = *static_cast<const uint16*>(base); break;
-			case 4: idx = *static_cast<const uint32*>(base); break;
+			case 1: idx = *static_cast<const NifUint8*>(base); break;
+			case 2: idx = *static_cast<const NifUint16*>(base); break;
+			case 4: idx = *static_cast<const NifUint32*>(base); break;
 			default:
-				ASSERT(false);
+				NIFLECT_ASSERT(false);
 				break;
 			}
 			auto& name = et->GetEnumConstNameByIndex(idx);
@@ -34,14 +34,14 @@ namespace Niflect
 			auto rwValue = rw->GetValue();
 			auto name = rwValue->GetString();
 			auto idx = et->FindEnumConstMetaIndex(name);
-			ASSERT(idx != INDEX_NONE);//可能由于此枚举类型的版本不同导致查找失败
+			NIFLECT_ASSERT(idx != NifInvalidIndex);//可能由于此枚举类型的版本不同导致查找失败
 			switch (et->GetTypeSize())
 			{
-			case 1: *static_cast<uint8*>(base) = idx; break;
-			case 2: *static_cast<uint16*>(base) = idx; break;
-			case 4: *static_cast<uint32*>(base) = idx; break;
+			case 1: *static_cast<NifUint8*>(base) = idx; break;
+			case 2: *static_cast<NifUint16*>(base) = idx; break;
+			case 4: *static_cast<NifUint32*>(base) = idx; break;
 			default:
-				ASSERT(false);
+				NIFLECT_ASSERT(false);
 				break;
 			}
 			return true;

@@ -24,7 +24,7 @@ namespace Niflect
 		virtual bool SaveInstanceImpl(const InstanceType* base, CRwNode* rw) const override
 		{
 			auto& instance = *static_cast<const TArrayType*>(base);
-			ASSERT(!rw->IsArray());
+			NIFLECT_ASSERT(!rw->IsArray());
 			auto rwArray = rw->ToArray();
 			auto elemType = this->GetElementType();
 			for (auto idx = 0; idx < instance.size(); ++idx)
@@ -39,7 +39,7 @@ namespace Niflect
 		virtual bool LoadInstanceImpl(InstanceType* base, const CRwNode* rw) const override
 		{
 			auto& instance = *static_cast<TArrayType*>(base);
-			ASSERT(rw->IsArray());
+			NIFLECT_ASSERT(rw->IsArray());
 			auto rwArray = rw->GetArray();
 			auto elemType = this->GetElementType();
 			instance.resize(rwArray->GetItemsCount());
@@ -55,7 +55,7 @@ namespace Niflect
 		{
 			auto& instance = *static_cast<TArrayType*>(node->GetBase());
 			auto elemType = this->GetElementType();
-			uint32 idx = 0;
+			NifUint32 idx = 0;
 			for (auto& it : instance)
 			{
 				auto elemNode = CreateInstanceNode();
@@ -89,7 +89,7 @@ namespace Niflect
 		virtual bool SaveInstanceImpl(const InstanceType* base, CRwNode* rw) const override
 		{
 			auto& instance = *static_cast<const TBitsArrayType*>(base);
-			ASSERT(!rw->IsArray());
+			NIFLECT_ASSERT(!rw->IsArray());
 			auto rwArray = rw->ToArray();
 			for (auto idx = 0; idx < instance.size(); ++idx)
 				rwArray->AddItemBool(instance[idx]);
@@ -98,7 +98,7 @@ namespace Niflect
 		virtual bool LoadInstanceImpl(InstanceType* base, const CRwNode* rw) const override
 		{
 			auto& instance = *static_cast<TBitsArrayType*>(base);
-			ASSERT(rw->IsArray());
+			NIFLECT_ASSERT(rw->IsArray());
 			auto rwArray = rw->GetArray();
 			instance.resize(GetRwItemsCount(rwArray));
 			for (auto idx = 0; idx < instance.size(); ++idx)
@@ -132,7 +132,7 @@ namespace Niflect
 		virtual bool SaveInstanceImpl(const InstanceType* base, CRwNode* rw) const override
 		{
 			auto& instance = *static_cast<const TMapType*>(base);
-			ASSERT(!rw->IsArray());
+			NIFLECT_ASSERT(!rw->IsArray());
 			auto rwArray = rw->ToArray();
 			auto elemType = this->GetElementType();
 			for (auto& it : instance)
@@ -147,11 +147,11 @@ namespace Niflect
 		virtual bool LoadInstanceImpl(InstanceType* base, const CRwNode* rw) const override
 		{
 			auto& instance = *static_cast<TMapType*>(base);
-			ASSERT(rw->IsArray());
+			NIFLECT_ASSERT(rw->IsArray());
 			auto rwArray = rw->GetArray();
 			auto elemType = this->GetElementType();
 			auto cnt = rwArray->GetItemsCount();
-			for (uint32 idx = 0; idx < cnt; ++idx)
+			for (NifUint32 idx = 0; idx < cnt; ++idx)
 			{
 				auto rwItem = rwArray->GetItem(idx);
 				TElem item;
@@ -165,7 +165,7 @@ namespace Niflect
 		{
 			auto& instance = *static_cast<TMapType*>(node->GetBase());
 			auto elemType = this->GetElementType();
-			uint32 idx = 0;
+			NifUint32 idx = 0;
 			for (auto& it : instance)
 			{
 				auto elemBase = &it;

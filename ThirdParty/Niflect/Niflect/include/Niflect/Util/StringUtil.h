@@ -209,7 +209,7 @@ namespace NiflectUtil
 		if (!ofs.is_open())
 		{
 			printf("%s\n", filePath.c_str());
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 		}
 		ofs << data;
 		ofs.close();
@@ -277,7 +277,7 @@ namespace NiflectUtil
 	static Niflect::CString CombineFromStrings(const Niflect::TArray<Niflect::CString>& vecPath, const Niflect::CString& delim)
 	{
 		Niflect::CString str;
-		for (uint32 idx = 0; idx < vecPath.size(); ++idx)
+		for (Niflect::NifUint32 idx = 0; idx < vecPath.size(); ++idx)
 		{
 			str += vecPath[idx];
 			if (idx != vecPath.size() - 1)
@@ -302,12 +302,12 @@ namespace NiflectUtil
 		// ·µ»ØÐÞ¼ôºóµÄ×Ö·û´®
 		return (start < end) ? Niflect::CString(start, end) : Niflect::CString();
 	}
-	static uint64 StableHash(const Niflect::CString& str) {
-		constexpr uint64 FNV_OFFSET_BASIS = 0xcbf29ce484222325;
-		constexpr uint64 FNV_PRIME = 0x100000001b3;
-		uint64 hash = FNV_OFFSET_BASIS;
+	static Niflect::NifUint64 StableHash(const Niflect::CString& str) {
+		constexpr Niflect::NifUint64 FNV_OFFSET_BASIS = 0xcbf29ce484222325;
+		constexpr Niflect::NifUint64 FNV_PRIME = 0x100000001b3;
+		Niflect::NifUint64 hash = FNV_OFFSET_BASIS;
 		for (char c : str) {
-			hash ^= static_cast<uint64>(static_cast<uint8>(c));
+			hash ^= static_cast<Niflect::NifUint64>(static_cast<Niflect::NifUint8>(c));
 			hash *= FNV_PRIME;
 		}
 		return hash;

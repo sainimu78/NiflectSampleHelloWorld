@@ -12,7 +12,7 @@ namespace NiflectUtil
 		TFileStream(const char* filePath)
 			: inherited(filePath, std::ios::binary)
 		{
-			ASSERT(this->is_open());
+			NIFLECT_ASSERT(this->is_open());
 		}
 		TFileStream(const Niflect::CString& filePath)
 			: TFileStream(filePath.c_str())

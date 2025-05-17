@@ -16,7 +16,7 @@ namespace Niflect
 
 	struct STypeLifecycleMeta
 	{
-		uint32 m_typeSize;
+		NifUint32 m_typeSize;
 		InvokeConstructorFunc m_InvokeConstructorFunc;//默认函数参数形式为 InvokeConstructorFunc
 		InvokeDestructorFunc m_InvokeDestructorFunc;
 	};
@@ -37,16 +37,16 @@ namespace Niflect
 	public:
 		CNiflectType()
 			: m_table(NULL)
-			, m_tableIdx(INDEX_NONE)
+			, m_tableIdx(NifInvalidIndex)
 			, m_typeSize(0)
-#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
+#ifdef NIFLECTDEV_GENERATED_TYPE_ALIGNMENT
 			, m_typeAlignment(0)
 #else
 #endif
 			, m_InvokeDestructorFunc(NULL)
 			, m_BuildTypeMetaFunc(NULL)
 			, m_staticTypePtrAddr(NULL)
-			, m_typeHash(INVALID_HASH)
+			, m_typeHash(NifInvalidHash)
 		{
 		}
 		~CNiflectType()
@@ -56,14 +56,14 @@ namespace Niflect
 		}
 
 	public:
-		void InitTypeMeta(CNiflectTable* table, uint32 tableIdx, uint32 typeSize, uint32 typeAlignment, const InvokeDestructorFunc& inInvokeDestructorFunc, const HashInt& typeHash, const CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata)
+		void InitTypeMeta(CNiflectTable* table, NifUint32 tableIdx, NifUint32 typeSize, NifUint32 typeAlignment, const InvokeDestructorFunc& inInvokeDestructorFunc, const HashInt& typeHash, const CString& id, const BuildTypeMetaFunc& inBuildTypeMetaFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata)
 		{
 			m_name = id;
 			m_table = table;
 			m_tableIdx = tableIdx;
 			m_nata = nata;
 			m_typeSize = typeSize;
-#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
+#ifdef NIFLECTDEV_GENERATED_TYPE_ALIGNMENT
 			m_typeAlignment = typeAlignment;
 #else
 #endif
@@ -79,7 +79,7 @@ namespace Niflect
 		{
 			return m_table;
 		}
-		const uint32& GetTableIndex() const
+		const NifUint32& GetTableIndex() const
 		{
 			return m_tableIdx;
 		}
@@ -87,12 +87,12 @@ namespace Niflect
 		{
 			return m_name;
 		}
-		const uint32& GetTypeSize() const//todo: 计划改名为 GetNativeTypeSize
+		const NifUint32& GetTypeSize() const//todo: 计划改名为 GetNativeTypeSize
 		{
 			return m_typeSize;//对于C++ Built in类型, 返回类型为const ref是为了方便赋值类型用auto
 		}
-#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
-		const uint32& GetTypeAlignment() const
+#ifdef NIFLECTDEV_GENERATED_TYPE_ALIGNMENT
+		const NifUint32& GetTypeAlignment() const
 		{
 			return m_typeAlignment;
 		}
@@ -132,13 +132,13 @@ namespace Niflect
 	public:
 		void BuildTypeMeta()
 		{
-			ASSERT(m_layout.m_vecSubobject.size() == 0);
+			NIFLECT_ASSERT(m_layout.m_vecSubobject.size() == 0);
 			this->InitTypeLayout(m_layout);
 			m_BuildTypeMetaFunc(this);
 		}
 		void InitAccessor(const CSharedAccessor& accessor)
 		{
-			ASSERT(m_accessor == NULL);
+			NIFLECT_ASSERT(m_accessor == NULL);
 			m_accessor = accessor;
 		}
 		void InitAddField(const Niflect::CString& name, const OffsetType& offset, CNiflectType* type, const CSharedNata& nata, const HashInt& fieldHash)
@@ -180,7 +180,7 @@ namespace Niflect
 		CString m_name;
 		CSharedNata m_nata;
 		CNiflectTable* m_table;
-		uint32 m_tableIdx;
+		NifUint32 m_tableIdx;
 		CTypeLayout m_layout;
 		CSharedAccessor m_accessor;
 		Niflect::TArray<CField> m_vecFiled;
@@ -192,9 +192,9 @@ namespace Niflect
 		InvokeDestructorFunc m_InvokeDestructorFunc;
 
 	private:
-		uint32 m_typeSize;
-#ifdef DEVMACRO_GENERATED_TYPE_ALIGNMENT
-		uint32 m_typeAlignment;
+		NifUint32 m_typeSize;
+#ifdef NIFLECTDEV_GENERATED_TYPE_ALIGNMENT
+		NifUint32 m_typeAlignment;
 #else
 #endif
 		BuildTypeMetaFunc m_BuildTypeMetaFunc;
@@ -221,16 +221,16 @@ namespace Niflect
 		}
 
 	public:
-		void InitTypeMeta(uint32 niflectTypeSize, size_t typeHash, const CString& name, uint32 index, const STypeLifecycleMeta& cb)
+		void InitTypeMeta(NifUint32 niflectTypeSize, size_t typeHash, const CString& name, NifUint32 index, const STypeLifecycleMeta& cb)
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			//m_name = name;
 			//m_index = index;
 			//m_niflectTypeSize = niflectTypeSize;
 			//m_cb = cb;
 			//m_typeHash = typeHash;
 		}
-		void InitTypeMeta2(CNiflectTable* table, uint32 tableIdx, const STypeLifecycleMeta& lifecycleMeta, size_t typeHash, const CString& id, const CreateTypeAccessorFunc& inCreateTypeAccessorFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata)
+		void InitTypeMeta2(CNiflectTable* table, NifUint32 tableIdx, const STypeLifecycleMeta& lifecycleMeta, size_t typeHash, const CString& id, const CreateTypeAccessorFunc& inCreateTypeAccessorFunc, CStaticNiflectTypeAddr* staticTypePtrAddr, const CSharedNata& nata)
 		{
 			m_name = id;
 			m_table = table;
@@ -256,7 +256,7 @@ namespace Niflect
 		{
 			return m_table;
 		}
-		const uint32& GetTableIndex() const//todo: 计划改名为 GetTableIndex
+		const NifUint32& GetTableIndex() const//todo: 计划改名为 GetTableIndex
 		{
 			return m_tableIdx;
 		}
@@ -264,7 +264,7 @@ namespace Niflect
 		{
 			return m_name;
 		}
-		const uint32& GetTypeSize() const//todo: 计划改名为 GetNativeTypeSize
+		const NifUint32& GetTypeSize() const//todo: 计划改名为 GetNativeTypeSize
 		{
 			return m_lifecycleMeta.m_typeSize;//对于C++ Built in类型, 返回类型为const ref是为了方便赋值类型用auto
 		}
@@ -310,28 +310,28 @@ namespace Niflect
 		//}
 		CSharedAccessor CreateFieldLayout() const//todo:计划删除
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			if (m_CreateTypeAccessorFunc != NULL)
 				return m_CreateTypeAccessorFunc();
 			return NULL;
 		}
 		CSharedAccessor CreateAccessor() const
 		{
-			ASSERT(false);
+			NIFLECT_ASSERT(false);
 			if (m_CreateTypeAccessorFunc != NULL)
 				return m_CreateTypeAccessorFunc();
 			return NULL;
 		}
 		void InitFieldLayout()
 		{
-			ASSERT(false);//todo: 计划废弃, 缓存应包含所有继承链上的layout, 另外layout也必须根据完整layout进行相应的初始化
+			NIFLECT_ASSERT(false);//todo: 计划废弃, 缓存应包含所有继承链上的layout, 另外layout也必须根据完整layout进行相应的初始化
 			//todo: 未确定方案, 用到再创建还是在Module初始化时统一遍历创建, 现用后者实验
-			//ASSERT(m_fieldRoot == NULL);
+			//NIFLECT_ASSERT(m_fieldRoot == NULL);
 			//m_fieldRoot = this->CreateFieldLayout();
 		}
 		void InitTypeLayout()
 		{
-			ASSERT(m_layout.m_vecAccessor.size() == 0);
+			NIFLECT_ASSERT(m_layout.m_vecAccessor.size() == 0);
 			this->CreateTypeLayout(m_layout);
 		}
 		void InitAddFieldToAccessor(CNiflectAccessor* owner, const Niflect::CString& name, const OffsetType& offset, const CSharedNata& nata) const
@@ -377,10 +377,10 @@ namespace Niflect
 		{
 			auto Check = [this]()
 			{
-				ASSERT(GetTypeHash<T>() == m_typeHash);
+				NIFLECT_ASSERT(GetTypeHash<T>() == m_typeHash);
 				return true;
 			};
-			ASSERT(Check());
+			NIFLECT_ASSERT(Check());
 			return *static_cast<T*>(base);
 		}
 
@@ -411,7 +411,7 @@ namespace Niflect
 		CString m_name;
 		CSharedNata m_nata;
 		CNiflectTable* m_table;
-		uint32 m_tableIdx;//todo: 计划改名为 m_tableIdx;
+		NifUint32 m_tableIdx;//todo: 计划改名为 m_tableIdx;
 		CTypeLayout m_layout;
 		STypeLifecycleMeta m_lifecycleMeta;//todo: 计划改名为 m_typeFuncs
 		CreateTypeAccessorFunc m_CreateTypeAccessorFunc;
@@ -439,7 +439,7 @@ namespace Niflect
 	inline static TSharedPtr<TBase> NiflectTypeMakeShared(const CNiflectType* type)
 	{
 		Niflect::InstanceType** argArray = NULL;
-		ASSERT(type->m_vecConstructorInfo[0].m_vecInput.size() == 0);
+		NIFLECT_ASSERT(type->m_vecConstructorInfo[0].m_vecInput.size() == 0);
 		return GenericPlacementMakeShared<TBase, CMemory>(type->GetTypeSize(), type->m_InvokeDestructorFunc, type->m_vecConstructorInfo[0].m_Func, argArray);
 	}
 	template <typename TBase, typename ...TArgs>
@@ -447,7 +447,7 @@ namespace Niflect
 	{
 		//std::array<Niflect::InstanceType*, sizeof ...(TArgs)> args_array = { (&args)... };//如使用 std::array 则可不定义无参数版本的函数
 		Niflect::InstanceType* argArray[] = { (&args)... };
-		ASSERT(type->m_vecConstructorInfo[0].m_vecInput.size() > 0);
+		NIFLECT_ASSERT(type->m_vecConstructorInfo[0].m_vecInput.size() > 0);
 		return GenericPlacementMakeShared<TBase, CMemory>(type->GetTypeSize(), type->m_InvokeDestructorFunc, type->m_vecConstructorInfo[0].m_Func, argArray);
 	}
 	#endif
@@ -504,30 +504,30 @@ namespace Niflect
 		{
 			return m_enumMeta;
 		}
-		const CString& GetEnumConstNameByIndex(uint32 idx) const
+		const CString& GetEnumConstNameByIndex(NifUint32 idx) const
 		{
 			return m_enumMeta.m_vecEnumConstMeta[idx].m_name;
 		}
-		uint32 FindEnumConstMetaIndex(const CString& name) const
+		NifUint32 FindEnumConstMetaIndex(const CString& name) const
 		{
-			for (uint32 idx = 0; idx < m_enumMeta.m_vecEnumConstMeta.size(); ++idx)
+			for (NifUint32 idx = 0; idx < m_enumMeta.m_vecEnumConstMeta.size(); ++idx)
 			{
 				if (m_enumMeta.m_vecEnumConstMeta[idx].m_name == name)
 					return idx;
 			}
-			return INDEX_NONE;
+			return NifInvalidIndex;
 		}
 		template <typename TEnumType>
 		const CString& GetEnumConstName(const TEnumType& e) const
 		{
-			auto idx = static_cast<uint32>(e);
+			auto idx = static_cast<NifUint32>(e);
 			return this->GetEnumConstNameByIndex(idx);
 		}
 
 	public:
 		static CEnum* Cast(CNiflectType* base)
 		{
-			ASSERT(dynamic_cast<CEnum*>(base) != NULL);
+			NIFLECT_ASSERT(dynamic_cast<CEnum*>(base) != NULL);
 			return static_cast<CEnum*>(base);
 		}
 
@@ -575,7 +575,7 @@ namespace Niflect
 	public:
 		static CInheritableType* Cast(CNiflectType* base)
 		{
-			ASSERT(dynamic_cast<CInheritableType*>(base) != NULL);
+			NIFLECT_ASSERT(dynamic_cast<CInheritableType*>(base) != NULL);
 			return static_cast<CInheritableType*>(base);
 		}
 		static CInheritableType* CastChecked(CNiflectType* base)
@@ -610,12 +610,12 @@ namespace Niflect
 			inherited::CreateTypeLayout(layout);
 			if (m_parent != NULL)
 			{
-				ASSERT(layout.m_vecAccessor.size() == 1);
+				NIFLECT_ASSERT(layout.m_vecAccessor.size() == 1);
 				auto par = m_parent;
 				while (par != NULL)
 				{
 					auto& Func = par->GetCreateTypeAccessorFunc();
-					ASSERT(Func != NULL);
+					NIFLECT_ASSERT(Func != NULL);
 					layout.m_vecAccessor.insert(layout.m_vecAccessor.begin(), Func());
 					par = par->m_parent;
 				}
@@ -649,7 +649,7 @@ namespace Niflect
 	public:
 		static CInheritableType* Cast(CNiflectType* base)
 		{
-			ASSERT(dynamic_cast<CInheritableType*>(base) != NULL);
+			NIFLECT_ASSERT(dynamic_cast<CInheritableType*>(base) != NULL);
 			return static_cast<CInheritableType*>(base);
 		}
 		static CInheritableType* CastChecked(CNiflectType* base)
@@ -668,7 +668,7 @@ namespace Niflect
 	public:
 		static CStruct* Cast(CNiflectType* base)
 		{
-			ASSERT(dynamic_cast<CStruct*>(base) != NULL);
+			NIFLECT_ASSERT(dynamic_cast<CStruct*>(base) != NULL);
 			return static_cast<CStruct*>(base);
 		}
 	};
@@ -680,7 +680,7 @@ namespace Niflect
 	public:
 		static CClass* Cast(CNiflectType* base)
 		{
-			ASSERT(dynamic_cast<CClass*>(base) != NULL);
+			NIFLECT_ASSERT(dynamic_cast<CClass*>(base) != NULL);
 			return static_cast<CClass*>(base);
 		}
 

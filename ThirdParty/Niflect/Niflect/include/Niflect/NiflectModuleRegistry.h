@@ -11,13 +11,13 @@ namespace Niflect
 		friend class CNiflectModuleRegistry;
 	public:
 		CNiflectModule2()
-			: m_indexInManager(INDEX_NONE)
+			: m_indexInManager(NifInvalidIndex)
 			, m_RegisterTypesFunc(NULL)
 			, m_InitTypesFunc(NULL)
 			, m_table(this)
 		{
 		}
-		void InitMeta(const Niflect::CString& name, uint32 moduleIdx, const ModuleRegisterTypesFunc& RegisterTypesFunc, const ModuleInitTypesFunc& InitTypesFunc)
+		void InitMeta(const Niflect::CString& name, NifUint32 moduleIdx, const ModuleRegisterTypesFunc& RegisterTypesFunc, const ModuleInitTypesFunc& InitTypesFunc)
 		{
 			m_name = name;
 			m_RegisterTypesFunc = RegisterTypesFunc;
@@ -50,7 +50,7 @@ namespace Niflect
 		CNiflectTable m_table;
 		ModuleRegisterTypesFunc m_RegisterTypesFunc;
 		ModuleInitTypesFunc m_InitTypesFunc;
-		uint32 m_indexInManager;
+		NifUint32 m_indexInManager;
 	};
 	using CSharedModule2 = Niflect::TSharedPtr<CNiflectModule2>;
 
@@ -59,8 +59,8 @@ namespace Niflect
 		friend class CNiflectModuleRegger;
 	public:
 		NIFLECT_API void InitRegisteredModules();
-		NIFLECT_API uint32 GetModulesCount() const;
-		NIFLECT_API CNiflectModule2* GetModuleByIndex(uint32 idx) const;
+		NIFLECT_API NifUint32 GetModulesCount() const;
+		NIFLECT_API CNiflectModule2* GetModuleByIndex(NifUint32 idx) const;
 
 	private:
 		NIFLECT_API bool RegisterModuleStatically(const Niflect::CString& name, const ModuleRegisterTypesFunc& RegisterTypesFunc, const ModuleInitTypesFunc& InitTypesFunc);

@@ -19,7 +19,7 @@ namespace Niflect
 	//	}
 	//	void Init(InstanceType* base)
 	//	{
-	//		ASSERT(m_base == NULL);
+	//		NIFLECT_ASSERT(m_base == NULL);
 	//		m_base = base;
 	//	}
 
@@ -45,7 +45,7 @@ namespace Niflect
 	//	}
 	//	void InitAddr(InstanceType* base)
 	//	{
-	//		ASSERT(m_base == NULL);
+	//		NIFLECT_ASSERT(m_base == NULL);
 	//		m_base = base;
 	//		if (m_delegate != NULL)
 	//			m_delegate->Init(m_base);
@@ -53,18 +53,18 @@ namespace Niflect
 	//	template <typename T>
 	//	void InitDelegate()
 	//	{
-	//		ASSERT(m_delegate == NULL);
+	//		NIFLECT_ASSERT(m_delegate == NULL);
 	//		m_delegate = Niflect::MakeShared<T>();
 	//	}
 	//	void AddNode(const CSharedInstanceNode& node)
 	//	{
 	//		return m_vecNode.push_back(node);
 	//	}
-	//	uint32 GetNodesCount() const
+	//	NifUint32 GetNodesCount() const
 	//	{
-	//		return static_cast<uint32>(m_vecNode.size());
+	//		return static_cast<NifUint32>(m_vecNode.size());
 	//	}
-	//	CNiflectInstanceNode* GetNode(uint32 idx) const
+	//	CNiflectInstanceNode* GetNode(NifUint32 idx) const
 	//	{
 	//		return m_vecNode[idx].Get();
 	//	}
@@ -146,11 +146,11 @@ namespace Niflect
 		{
 			return m_vecNode.push_back(node);
 		}
-		uint32 GetNodesCount() const
+		NifUint32 GetNodesCount() const
 		{
-			return static_cast<uint32>(m_vecNode.size());
+			return static_cast<NifUint32>(m_vecNode.size());
 		}
-		CNiflectInstanceNode* GetNode(uint32 idx) const
+		CNiflectInstanceNode* GetNode(NifUint32 idx) const
 		{
 			return m_vecNode[idx].Get();
 		}
@@ -164,7 +164,7 @@ namespace Niflect
 
 	private:
 		friend CNiflectInstanceNode* VisitInstanceNodeByNamePath(CNiflectInstanceNode* root, const Niflect::TArray<Niflect::CString>& vecPath);
-		static CNiflectInstanceNode* VisitByNamePathRecurs(CNiflectInstanceNode* parent, const Niflect::TArray<Niflect::CString>& vecPath, uint32 frontIdx)
+		static CNiflectInstanceNode* VisitByNamePathRecurs(CNiflectInstanceNode* parent, const Niflect::TArray<Niflect::CString>& vecPath, NifUint32 frontIdx)
 		{
 			if (parent->GetName() == vecPath[frontIdx])
 			{
@@ -193,7 +193,7 @@ namespace Niflect
 	}
 	inline CNiflectInstanceNode* VisitInstanceNodeByNamePath(CNiflectInstanceNode* root, const Niflect::TArray<Niflect::CString>& vecPath)
 	{
-		ASSERT(vecPath.size() > 0);
+		NIFLECT_ASSERT(vecPath.size() > 0);
 		return CNiflectInstanceNode::VisitByNamePathRecurs(root, vecPath, 0);
 	}
 	template <typename TTypeHas_GetName_and_GetParent>
@@ -211,13 +211,13 @@ namespace Niflect
 
 namespace Niflect
 {
-	static void DebugPrintInstanceNodeRecurs(const CNiflectInstanceNode* parent, uint32 depth = 0)
+	static void DebugPrintInstanceNodeRecurs(const CNiflectInstanceNode* parent, NifUint32 depth = 0)
 	{
 		auto strDep = NiflectUtil::DebugIndentToString(depth);
 		auto nodeName = parent->GetName();
 		printf("%s%s\n", strDep.c_str(), nodeName.c_str());
 		depth++;
-		for (uint32 idx = 0; idx < parent->GetNodesCount(); ++idx)
+		for (NifUint32 idx = 0; idx < parent->GetNodesCount(); ++idx)
 			DebugPrintInstanceNodeRecurs(parent->GetNode(idx), depth);
 	}
 }

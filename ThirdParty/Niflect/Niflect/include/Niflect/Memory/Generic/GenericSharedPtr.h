@@ -49,7 +49,7 @@ namespace Niflect
 
 	struct SGenericSharedPtrData
 	{
-		uint32 m_refCount;//可改为平台相关的整数或64位整数, 现认为32位足够, 如类型改为64位整数, 则公共智能指针数据占用空间相应增加4字节
+		NifUint32 m_refCount;//可改为平台相关的整数或64位整数, 现认为32位足够, 如类型改为64位整数, 则公共智能指针数据占用空间相应增加4字节
 #ifdef DETERMINE_CONSTRUCTED_FROM_MAKESHARED_OR_MAKESHARABLE_BY_A_BOOL
 		bool m_isAllocatedByMakeShared;//为支持MakeShared, 内部确定如何删除data, 如有规范要求只能用MakeShared或MakeSharable, 则可不定义该bool以减少占用内存与略微简化释放对象的过程
 #else
@@ -69,7 +69,7 @@ namespace Niflect
 		template <typename TDerived, typename TSameMemory>
 		friend class TGenericSharedPtr;
 		template <typename TBase, typename TMemory2, typename TConstructFunc, typename ...TArgs>
-		friend TGenericSharedPtr<TBase, TMemory2> GenericPlacementMakeShared(uint32 objSize, const InvokeDestructorFunc& DestructFunc, const TConstructFunc& ConstructFunc, TArgs&& ...args);
+		friend TGenericSharedPtr<TBase, TMemory2> GenericPlacementMakeShared(NifUint32 objSize, const InvokeDestructorFunc& DestructFunc, const TConstructFunc& ConstructFunc, TArgs&& ...args);
 		template <typename TBase, typename TMemory2>
 		friend TGenericSharedPtr<TBase, TMemory2> GenericPlacementMakeSharable(TBase* rawPtr, const InvokeDestructorFunc& DestructFunc);
 
@@ -101,7 +101,7 @@ namespace Niflect
 			: m_ptr(NULL)
 			, m_data(NULL)
 		{
-			ASSERT(nullPtr == nullptr);
+			NIFLECT_ASSERT(nullPtr == nullptr);
 		}
 		~TGenericSharedPtr()
 		{
@@ -185,7 +185,7 @@ namespace Niflect
 	private:
 		void InitWithData(PtrType* ptr, const InvokeDestructorFunc& DestructFunc)
 		{
-			ASSERT(m_data == NULL);
+			NIFLECT_ASSERT(m_data == NULL);
 			m_ptr = ptr;
 			m_data = static_cast<SGenericSharedPtrData*>(MemoryType::Alloc(sizeof(SGenericSharedPtrData)));
 			StaticInitData(m_data, DestructFunc, false);
@@ -193,7 +193,7 @@ namespace Niflect
 		}
 		void InitWithSharedData(PtrType* ptr, const InvokeDestructorFunc& DestructFunc, SGenericSharedPtrData* data)
 		{
-			ASSERT(m_data == NULL);
+			NIFLECT_ASSERT(m_data == NULL);
 			m_ptr = ptr;
 			m_data = data;
 #ifdef DETERMINE_CONSTRUCTED_FROM_MAKESHARED_OR_MAKESHARABLE_BY_A_BOOL
@@ -203,7 +203,7 @@ namespace Niflect
 			//ss << DestructFunc;
 			//printf("My DestructFunc %s\n", ss.str().c_str());
 			//测试发现在 MinGW Build 的 DestructFunc 地址为 0x1
-			ASSERT((reinterpret_cast<ptrdiff_t>(DestructFunc) & 0x1) == 0);
+			NIFLECT_ASSERT((reinterpret_cast<ptrdiff_t>(DestructFunc) & 0x1) == 0);
 
 			auto flaggedDestructFunc = reinterpret_cast<InvokeDestructorFunc>(reinterpret_cast<ptrdiff_t>(DestructFunc) | 0x1);
 			StaticInitData(m_data, flaggedDestructFunc, true);
@@ -278,15 +278,15 @@ namespace Niflect
 				{
 					funcAsInt &= ~0x1;
 					void* mem = reinterpret_cast<char*>(m_ptr) - sizeof(SGenericSharedPtrData);
-					ASSERT(m_data->m_debugIsAllocatedByMakeShared);
+					NIFLECT_ASSERT(m_data->m_debugIsAllocatedByMakeShared);
 					auto DestructorFunc = reinterpret_cast<InvokeDestructorFunc>(funcAsInt);
 					DestructorFunc(m_ptr);
 					MemoryType::Free(mem);
 					return;
 				}
 
-				ASSERT((reinterpret_cast<ptrdiff_t>(m_data->m_InvokeDestructorFunc) & 0x1) == 0);
-				ASSERT(!m_data->m_debugIsAllocatedByMakeShared);
+				NIFLECT_ASSERT((reinterpret_cast<ptrdiff_t>(m_data->m_InvokeDestructorFunc) & 0x1) == 0);
+				NIFLECT_ASSERT(!m_data->m_debugIsAllocatedByMakeShared);
 
 				CGenericInstance::DestructAndFree<MemoryType>(m_ptr, m_data->m_InvokeDestructorFunc);
 				//UE的实现方法, 定义一种析构代理类(见DefaultDeleter), MakeShareable时使用CRT默认new创建, 在删除时使用的CRT默认delete释放
@@ -315,7 +315,7 @@ namespace Niflect
 		SGenericSharedPtrData* m_data;
 	};
 	template <typename TBase, typename TMemory, typename TConstructFunc, typename ...TArgs>
-	static TGenericSharedPtr<TBase, TMemory> GenericPlacementMakeShared(uint32 objSize, const InvokeDestructorFunc& DestructFunc, const TConstructFunc& ConstructFunc, TArgs&& ...args)
+	static TGenericSharedPtr<TBase, TMemory> GenericPlacementMakeShared(NifUint32 objSize, const InvokeDestructorFunc& DestructFunc, const TConstructFunc& ConstructFunc, TArgs&& ...args)
 	{
 		TGenericSharedPtr<TBase, TMemory> shared;
 		auto dataSize = sizeof(SGenericSharedPtrData);
@@ -336,7 +336,7 @@ namespace Niflect
 	static TGenericSharedPtr<TBase, TMemory> GenericPlacementMakeSharable(TBase* rawPtr, const InvokeDestructorFunc& DestructFunc)
 	{
 		TGenericSharedPtr<TBase, TMemory> shared;
-		ASSERT(rawPtr != NULL);
+		NIFLECT_ASSERT(rawPtr != NULL);
 		shared.InitWithData(rawPtr, DestructFunc);
 		return shared;
 	}
@@ -429,7 +429,7 @@ namespace Niflect
 			}
 			static void* Realloc(void* ptr, size_t size)
 			{
-				ASSERT(false);
+				NIFLECT_ASSERT(false);
 				return realloc(ptr, size);
 			}
 			static void Free(void* ptr)
@@ -513,34 +513,34 @@ namespace Niflect
 			{
 				TTestSharedPtr<CMyClass1> a = TestMakeShared<CMyClass1>();
 				auto sizeWithSharedPtrUnit = sizeof(CMyClass1)+sizeof(TTestSharedPtr<CMyClass1>);
-				ASSERT(a.m_data->m_refCount == 1);
-				ASSERT(runtimeBytes == sizeWithSharedPtrUnit);
+				NIFLECT_ASSERT(a.m_data->m_refCount == 1);
+				NIFLECT_ASSERT(runtimeBytes == sizeWithSharedPtrUnit);
 				auto b = TestMakeShared<CMyClass1>(1.0f, true);
-				ASSERT(runtimeBytes == sizeWithSharedPtrUnit * 2);
-				ASSERT(b.m_data->m_refCount == 1);
+				NIFLECT_ASSERT(runtimeBytes == sizeWithSharedPtrUnit * 2);
+				NIFLECT_ASSERT(b.m_data->m_refCount == 1);
 				b = a;
-				ASSERT(a.m_data->m_refCount == 2);
-				ASSERT(a.m_data == b.m_data);
+				NIFLECT_ASSERT(a.m_data->m_refCount == 2);
+				NIFLECT_ASSERT(a.m_data == b.m_data);
 				auto c = b;
-				ASSERT(a.m_data->m_refCount == 3);
+				NIFLECT_ASSERT(a.m_data->m_refCount == 3);
 				b = NULL;
-				ASSERT(a.m_data->m_refCount == 2);
-				ASSERT(runtimeBytes == sizeWithSharedPtrUnit);
+				NIFLECT_ASSERT(a.m_data->m_refCount == 2);
+				NIFLECT_ASSERT(runtimeBytes == sizeWithSharedPtrUnit);
 				CMyClass1* d = new (CTestMemory::Alloc(sizeof(CMyClass1))) CMyClass1();
-				ASSERT(runtimeBytes == sizeWithSharedPtrUnit + sizeof(CMyClass1));
+				NIFLECT_ASSERT(runtimeBytes == sizeWithSharedPtrUnit + sizeof(CMyClass1));
 				auto e = TestMakeSharable(d);
-				ASSERT(e.m_data->m_refCount == 1);
-				ASSERT(runtimeBytes == sizeWithSharedPtrUnit * 2);
+				NIFLECT_ASSERT(e.m_data->m_refCount == 1);
+				NIFLECT_ASSERT(runtimeBytes == sizeWithSharedPtrUnit * 2);
 				auto f = e;
-				ASSERT(e.m_data->m_refCount == 2);
-				ASSERT(runtimeBytes == sizeWithSharedPtrUnit * 2);
+				NIFLECT_ASSERT(e.m_data->m_refCount == 2);
+				NIFLECT_ASSERT(runtimeBytes == sizeWithSharedPtrUnit * 2);
 				f = NULL;
-				ASSERT(e.m_data->m_refCount == 1);
+				NIFLECT_ASSERT(e.m_data->m_refCount == 1);
 				e = nullptr;
-				ASSERT(e.m_data == NULL);
-				ASSERT(runtimeBytes == sizeWithSharedPtrUnit);
+				NIFLECT_ASSERT(e.m_data == NULL);
+				NIFLECT_ASSERT(runtimeBytes == sizeWithSharedPtrUnit);
 			}
-			ASSERT(runtimeBytes == 0);
+			NIFLECT_ASSERT(runtimeBytes == 0);
 		}
 	}
 #endif

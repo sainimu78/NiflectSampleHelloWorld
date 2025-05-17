@@ -10,7 +10,7 @@ namespace Niflect
 		{
 			for (auto& it : this->GetOwnerType()->GetFields())
 			{
-				ASSERT(!it.GetName().empty());
+				NIFLECT_ASSERT(!it.GetName().empty());
 				auto rwField = CreateRwNode();
 				if (it.TypeSaveInstanceToRwNode(base, rwField.Get()))
 					AddExistingRwNode(rw, it.GetName(), rwField);
@@ -21,7 +21,7 @@ namespace Niflect
 		{
 			for (auto& it : this->GetOwnerType()->GetFields())
 			{
-				ASSERT(!it.GetName().empty());
+				NIFLECT_ASSERT(!it.GetName().empty());
 				auto rwChild = FindRwNode(rw, it.GetName());
 				it.TypeLoadInstanceFromRwNode(base, rwChild);
 			}
@@ -31,7 +31,7 @@ namespace Niflect
 		{
 			for (auto& it : this->GetOwnerType()->GetFields())
 			{
-				ASSERT(!it.GetName().empty());
+				NIFLECT_ASSERT(!it.GetName().empty());
 				auto fieldNode = CreateInstanceNode();
 				if (it.TypeBuildInstanceNode(node, fieldNode.Get()))
 					node->AddNode(fieldNode);

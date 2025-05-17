@@ -68,7 +68,7 @@ namespace Niflect
 	public:
 		CConstructorInfo()
 			: m_Func(NULL)
-			, m_signatureHash(INVALID_HASH)
+			, m_signatureHash(NifInvalidHash)
 		{
 		}
 		CConstructorInfo(const InvokeMethodFunc& Func, const CSharedNata& nata, const HashInt& signatureHash, const Niflect::CString& argsSignature)
@@ -90,7 +90,7 @@ namespace Niflect
 	public:
 		CMethodInfo()
 			: m_Func(NULL)
-			, m_signatureHash(INVALID_HASH)
+			, m_signatureHash(NifInvalidHash)
 		{
 		}
 		CMethodInfo(const InvokeMethodFunc& Func, const Niflect::CString& name, const CSharedNata& nata, const HashInt& signatureHash, const Niflect::CString& argsSignature)
@@ -115,7 +115,7 @@ namespace Niflect
 	public:
 		CFunctionInfo()
 			: m_Func(NULL)
-			, m_signatureHash(INVALID_HASH)
+			, m_signatureHash(NifInvalidHash)
 		{
 		}
 		CFunctionInfo(const InvokeFunctionFunc& Func, const Niflect::CString& name, const CSharedNata& nata, const HashInt& signatureHash, const Niflect::CString& argsSignature)
