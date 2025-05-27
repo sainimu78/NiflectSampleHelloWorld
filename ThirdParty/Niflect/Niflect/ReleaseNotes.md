@@ -1,6 +1,6 @@
 # Version
 
-Niflect 0.38.0
+Niflect 0.41.0
 
 # Features
 

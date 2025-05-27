@@ -27,7 +27,8 @@ namespace Niflect
 			CNiflectType* type = shared.Get();
 			auto idx = this->GetTypesCount();
 #ifdef NIFLECTDEV_GENERATED_TYPE_ALIGNMENT
-			auto alignment = alignof(TType);
+			using TypeForAlignment = typename std::conditional<std::is_abstract<TType>::value, void*, TType>::type;
+			const NifUint32 alignment = alignof(TypeForAlignment);
 #else
 			NifUint32 alignment = 0;
 #endif

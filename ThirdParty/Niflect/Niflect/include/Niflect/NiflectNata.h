@@ -23,4 +23,10 @@ namespace Niflect
 		static_assert(std::is_base_of<CNata, TDerivedNata>::value, "TDerivedNata must be a type derived from CNata");
 		return Niflect::MakeShared<TDerivedNata>(derived);
 	}
+	template <typename TDerivedNata>
+	static TDerivedNata* CastDerivedNata(CNata* base)
+	{
+		NIFLECT_ASSERT(dynamic_cast<TDerivedNata*>(base) != NULL);
+		return static_cast<TDerivedNata*>(base);
+	}
 }

@@ -16,4 +16,5 @@
 //备注, 此环境下未定义 _MSVC_TOOLSET_VERSION, _MSC_VER 为 1942, 无标准方法区分是否为 v140
 //建议充分了解各平台环境, 编译器对 alignof 支持情况, 或通用获取方法后再考虑改为正式支持
 //如需相关实验, 启用宏即可. 遇提示无法实例化抽象类的错误相应避免
-//#define NIFLECTDEV_GENERATED_TYPE_ALIGNMENT
+//2025.05.28, 现已通过 std::conditional + std::is_abstrac 实现避免问题
+#define NIFLECTDEV_GENERATED_TYPE_ALIGNMENT
