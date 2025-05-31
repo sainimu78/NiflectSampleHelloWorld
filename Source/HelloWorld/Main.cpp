@@ -1,6 +1,6 @@
 #include "HelloWorld.h"
-#include "HelloWorld_private.h"
 #include "Niflect/Serialization/JsonFormat.h"
+#include "HelloWorld_private.h"
 
 static void InitForTest(CHelloWorld& instance)
 {
