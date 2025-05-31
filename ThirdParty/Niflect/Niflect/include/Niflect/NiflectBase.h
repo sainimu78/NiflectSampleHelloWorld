@@ -1,9 +1,0 @@
-#pragma once
-#include "Niflect/Base/String.h"
-#include "Niflect/Base/Array.h"
-#include "Niflect/Base/Map.h"
-#include "Niflect/Base/UnorderedMap.h"
-#include "Niflect/Base/StringStream.h"
-#include "Niflect/Base/Set.h"
-#include "Niflect/Base/UnorderedSet.h"
-#include "Niflect/Base/SharedPtr.h"
