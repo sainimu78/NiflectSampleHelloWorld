@@ -11,6 +11,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  c_ProjectName: "HelloWorld"
 
 jobs:
   build:
@@ -36,7 +37,7 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       #run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
       shell: cmd  # 显式指定使用 CMD 解释器
-      working-directory: Build/HelloWorld/Windows
+      working-directory: Build/${{env.c_ProjectName}}/Windows
       run: |
         echo 当前工作目录: %cd%
         Generate.bat
@@ -45,15 +46,15 @@ jobs:
       # Build your program with the given configuration
       #run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
       shell: cmd  # 显式指定使用 CMD 解释器
-      working-directory: Build/HelloWorld/Windows
+      working-directory: Build/${{env.c_ProjectName}}/Windows
       run: |
         Build.bat
 
     - name: Run
       shell: cmd
-      working-directory: Build/HelloWorld/Windows/DefaultBuild/Release/bin
+      working-directory: Build/${{env.c_ProjectName}}/Windows/DefaultBuild/Release/bin
       run: |
-        HelloWorld.exe
+        ${{env.c_ProjectName}}.exe
 
 
     #- name: Test
