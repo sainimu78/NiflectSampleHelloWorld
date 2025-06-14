@@ -35,6 +35,7 @@ target_include_directories(${ModuleName}
 )
 
 list(APPEND v_ListModuleHeaderFilePath ${ModuleHeaders})
+set(v_EnabledLoadTimeModuleRegistrar TRUE)
 include(${c_RootThirdPartyDirPath}/Niflect/Shared.cmake)
 include(${c_RootThirdPartyDirPath}/NiflectGenTool/Exe.cmake)
 
