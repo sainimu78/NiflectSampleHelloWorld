@@ -24,9 +24,9 @@ int main()
 	printf("Registered type: %s\n", type->GetTypeName().c_str());
 
 	//Save src to rw
-	CRwNode rw;
 	CHelloWorld src;
 	InitForTest(src);
+	CRwNode rw;
 	type->SaveInstanceToRwNode(&src, &rw);
 	//Load dst from rw
 	CHelloWorld dst;
