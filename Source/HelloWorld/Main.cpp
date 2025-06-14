@@ -17,7 +17,7 @@ static bool operator==(const CHelloWorld& lhs, const CHelloWorld& rhs)
 int main()
 {
 	//Initialize types registry
-	Niflect::CNiflectModuleRegistry2 reg;
+	Niflect::CNiflectModuleRegistry reg;
 	reg.InitLoadTimeModules();
 
 	auto type = Niflect::StaticGetType<CHelloWorld>();
