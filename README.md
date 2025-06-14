@@ -37,11 +37,16 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
 
 ## 示例集
 
-### 最简示例, 反射一个类
+todo: 目录
+
+### 最简示例
+
+#### 反射类定义
 
 使用反射宏标签 `NIF_T` 声明被反射的示例类定义 `CHelloWorld`
 
 ```c++
+//HelloWorld.h
 #pragma once
 #include "Niflect/Default/DefaultMacroTag.h"
 
@@ -51,9 +56,34 @@ class CHelloWorld
 };
 ```
 
-### 初始化反射元数据
+#### 初始化与使用反射元数据
 
-todo
+在使用前, 通过 `InitLoadTimeModules` 初始化反射元数据
+
+```c++
+//Main.cpp
+#include "HelloWorld.h"
+#include "HelloWorld_private.h"
+
+void main()
+{
+	Niflect::CNiflectModuleRegistry reg;
+	reg.InitLoadTimeModules();
+
+	auto type = Niflect::StaticGetType<CHelloWorld>();
+	printf("Registered type: %s\n", type->GetTypeName().c_str());
+}
+```
+
+通过 `StaticGetType` 以静态反射的方式获取类型反射元数据
+
+类型反射元数据 `Niflect::CNiflectType` 中包含常用类型信息, 如本例中通过 `GetTypeName` 获取的类型名称
+
+### 反射字段
+
+float
+
+std::vector
 
 ### `RwNode` 保存载入与序列化
 
@@ -63,11 +93,7 @@ todo
 
 todo
 
-### 将字段绑定原生类编写的元数据
-
-todo
-
-### 自定义任意类型字段反射规则
+### 任意自定义类型字段序列化
 
 todo
 
@@ -91,11 +117,13 @@ todo
 
 todo
 
+### Niflect 提供的简易内存管理
+
+TSharedPtr
+
+MemoryStats
+
 ### 模块反射元数据自动发现
-
-todo
-
-### Niflect 提供的默认内存管理
 
 todo
 
@@ -103,7 +131,7 @@ todo
 
 todo
 
-### 反射成员函数
+### 反射成员函数与静态函数
 
 todo
 
@@ -115,19 +143,14 @@ todo
 
 todo
 
-### 遍历类型反射元数据
+### 将字段绑定原生类编写表示的元数据
 
 todo
 
-### 遍历字段反射元数据
+### 遍历反射元数据
 
 todo
 
-### 动态 AoS 到 SoA 绑定
+### 绑定别名字段类型
 
 todo
-
-### 不依赖类型定义头文件的字段反射元数据遍历
-
-todo
-
