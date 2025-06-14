@@ -20,7 +20,7 @@ int main()
 	Niflect::CNiflectModuleRegistry reg;
 	reg.InitLoadTimeModules();
 
-	auto type = Niflect::StaticGetType<CHelloWorld>();
+	Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
 	printf("Registered type: %s\n", type->GetTypeName().c_str());
 
 	//Save src to rw
