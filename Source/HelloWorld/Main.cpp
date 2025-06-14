@@ -21,7 +21,7 @@ int main()
 	reg.InitLoadTimeModules();
 
 	auto type = Niflect::StaticGetType<CHelloWorld>();
-	printf("Registered type name: %s\n", type->GetTypeName().c_str());
+	printf("Registered type: %s\n", type->GetTypeName().c_str());
 
 	//Save src to rw
 	CRwNode rw;
