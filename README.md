@@ -10,13 +10,13 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
 ### 非侵入式
 
 - 不要求继承自某个类
-- 零运行时开销声明式反射宏标签, 不改变被反射类型内存布局与虚表结构. 即被反射前后 `sizeof` 值相同
+- 零运行时开销的声明式反射宏标签, 不改变被反射类型内存布局与虚表结构. 即被反射前后 `sizeof` 值相同
 - 可为第三方库类型字段生成反射元数据
 
 ### C++ 原生风格
 
 - 支持通过非默认构造函数实例化. 仅要求构造函数的参数为可被反射的字段类型
-- 原生风格的元数据绑定, 即 IDE 友好且类型安全. 字段绑定的元数据即为 C++ 原生代码定义的类, 而非难使用, 难维护且须解析的字符串
+- 原生风格的元数据绑定, 即 IDE 友好且类型安全. 字段绑定的元数据即为 C++ 原生代码定义的类, 而非须解析且难维护的字符串
 - 字段类型可为别名
 
 ### 反射与序列化
@@ -24,7 +24,7 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
 - 支持可实例化类型定义与其几乎任意类型字段的反射与序列化
   - 多层嵌套的任意容器模板字段, 如 `std::vector<std::map<std::string, int> >`
   - 任意指针模板, 任意原始指针等字段, 仅须实现自定的序列化方法
-- 基于可编解码为任意格式的树型结构 `RwNode` 实现保存载入实例, 格式如 Niflect 提供的 JSON 格式编解码
+- 基于可编解码为任意格式的树型结构 `RwNode` 实现保存载入实例, 格式如 Niflect 提供的 JSON 编解码
 
 ### 动态反射
 
@@ -49,7 +49,7 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
 
 #### 不支持多继承
 
-不支持多继承中的基类为被反射的类型, 这不是因为无法实现, 而是无必要实现, 同时可避免支持非必要语言特性产生的误导. 因为多继承语法本身属于 OOP 的错误延伸, 除了引入复杂性外无实际有益作用
+不支持多继承中的基类为被反射的类型, 这是为避免支持非必要语言特性可能产生的误导
 
 #### 仅支持可被实例化类型的反射
 
@@ -83,7 +83,7 @@ class CHelloWorld
 };
 ```
 
-#### 初始化与使用反射元数据
+#### 初始化与使用类型反射元数据
 
 在使用前, 通过 `InitLoadTimeModules` 初始化反射元数据
 
@@ -256,11 +256,15 @@ AccessorSetting.h 由 NiflectGenTool 解析并生成与设置中访问器相关�
 ```c++
 template <typename T0, typename T1>
 NIFAS_A() TSetting<CCompoundAccessor, std::pair<T0, T1> >;
+
 NIFAS_A() TSetting<CSTLStringAccessor, std::string>;
+
 template <typename TInstance>
 NIFAS_A() TSetting<TSTLBitsArrayAccessor<TInstance>, std::vector<bool> >;
+
 template <typename TInstance, typename T>
 NIFAS_A() TSetting<TSTLArrayAccessor<TInstance>, std::vector<T> >;
+
 template <typename TInstance, typename T0, typename T1>
 NIFAS_A() TSetting<TSTLMapAccessor<TInstance>, std::map<T0, T1>, std::pair<T0, T1> >;
 ```
@@ -297,8 +301,7 @@ printf("%s\n", ss.str().c_str());
 
 #define MY_TYPE(...) _NIFLECTGENTAG_TYPE
 #define MY_FIELD(...) _NIFLECTGENTAG_FIELD
-#define MY_METHOD(...) _NIFLECTGENTAG_METHOD
-#define MY_ENUM_CONST(...) _NIFLECTGENTAG_ENUMCONST
+...
 ```
 
 HelloWorld 的 CMakeLists.txt 中指定对应头文件路径
@@ -345,20 +348,23 @@ private:
 
 ### 例10. 通过实例获取反射元数据
 
-指定 `-gat` 选项, 使 NiflectGenTool 在 NIFRIEND 宏展开中定义表示类本身的别名, 如 `using CThis = CHelloWorld`, 从而可通过宏魔法封装
+通过实例获取类型反射元数据是常见需求, 期望用法如下
+
+```c++
+CHelloWorld src;
+CReflectiveTypeBase* base = &src;
+assert(base->GetType() == Niflect::StaticGetType<CHelloWorld>());
+```
+
+为保持非侵入性, Niflect 不直接提供这种功能, 因此须由使用者决定获取方式, 下为几种常见写法参考
+
+#### 写法1, 类型反射元数据指针通过虚函数获取
+
+该写法含虚表开销
 
 ```c++
 #pragma once
 #include "HelloWorld_gen.h"
-
-#define REFLECTIVE_TYPE_DECL()\
-	NIFRIEND()\
-	public:\
-		virtual Niflect::CNiflectType* GetType() const override\
-		{\
-			return Niflect::StaticGetType<CThis>();\
-		}\
-	private:
 
 class CReflectiveTypeBase
 {
@@ -369,19 +375,78 @@ public:
 NIF_T()
 class CHelloWorld : public CReflectiveTypeBase
 {
-	REFLECTIVE_TYPE_DECL()
 public:
-	NIF_F()
-	float m_value = 0.0f;
+	virtual Niflect::CNiflectType* GetType() const override
+	{
+		return Niflect::StaticGetType<CHelloWorld>();
+	}
 };
 ```
 
-通过实例获取类型
+#### 写法2, 类型反射元数据指针作成员变量
+
+该写法无虚表开销, 但须侵入构造函数
 
 ```c++
-CHelloWorld src;
-CReflectiveTypeBase* base = &src;
-assert(base->GetType() == Niflect::StaticGetType<CHelloWorld>());
+#pragma once
+#include "HelloWorld_gen.h"
+
+class CReflectiveTypeBase
+{
+public:
+    CReflectiveTypeBase(Niflect::CNiflectType* type)
+        : m_type(type)
+    {
+    }
+    Niflect::CNiflectType* GetType() const
+    {
+        return m_type;
+    }
+    
+private:
+	Niflect::CNiflectType* m_type;
+};
+
+NIF_T()
+class CHelloWorld : public CReflectiveTypeBase
+{
+	typedef CReflectiveTypeBase inherited;
+public:
+	CHelloWorld()
+		: inherited(Niflect::StaticGetType<CHelloWorld>())
+    {
+    }
+};
+```
+
+#### 写法3, 宏魔法封装虚函数覆盖定义
+
+基于写法1, 指定 `-gat` 选项, 使 NiflectGenTool 在 `NIFRIEND` 宏展开中定义表示类本身的别名, 形如 `using CThis = CHelloWorld`, 从而可通过宏魔法封装
+
+```c++
+#pragma once
+#include "HelloWorld_gen.h"
+
+class CReflectiveTypeBase
+{
+public:
+	virtual Niflect::CNiflectType* GetType() const = 0;
+};
+
+#define REFLECTIVE_TYPE_DECL()									\
+	NIFRIEND()													\
+	public:														\
+		virtual Niflect::CNiflectType* GetType() const override	\
+		{														\
+			return Niflect::StaticGetType<CThis>();				\
+		}														\
+	private:
+
+NIF_T()
+class CHelloWorld : public CReflectiveTypeBase
+{
+	REFLECTIVE_TYPE_DECL()
+};
 ```
 
 ### 例11. Niflect 提供的简易堆内存管理
