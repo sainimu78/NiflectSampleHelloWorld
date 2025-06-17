@@ -508,7 +508,7 @@ todo: 大致内容是在动态库加载 `LoadLibrary`/`dlopen` 后执行 `reg.In
 namespace Niflect
 {
 	template <>
-	_ANTICHEAT_API CNiflectType* StaticGetType<CAntiCheat>();
+	_MY_SHARED_LIB_API CNiflectType* StaticGetType<CMyClass>();
 }
 ```
 
