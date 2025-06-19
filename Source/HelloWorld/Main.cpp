@@ -27,10 +27,10 @@ int main()
 	CHelloWorld src;
 	InitForTest(src);
 	CRwNode rw;
-	type->SaveInstanceToRwNode(&src, &rw);
+	SaveInstanceToRwNode(type, &src, &rw);
 	//Load dst from rw
 	CHelloWorld dst;
-	type->LoadInstanceFromRwNode(&dst, &rw);
+	LoadInstanceFromRwNode(type, &dst, &rw);
 	assert(src == dst);
 
 	//Serialize rw in JSON
