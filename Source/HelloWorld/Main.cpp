@@ -1,5 +1,5 @@
 #include "HelloWorld.h"
-#include "Niflect/Serialization/JsonFormat.h"
+#include "Niflect/Component/RwTree/Serialization/JsonFormat.h"
 #include "HelloWorld_private.h"
 
 using namespace RwTree;
