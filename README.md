@@ -15,6 +15,7 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
   - 见[例1](), [例2](), [例9]()
 - 可为第三方库类型字段生成反射元数据
   - 见[例5]()
+- 不要求启用 RTTI, 反射元数据无虚表开销
 
 ### C++ 原生风格
 
@@ -32,10 +33,20 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
 - 支持可实例化类型定义与其几乎任意类型字段的反射与序列化
   - 多层嵌套的任意容器模板字段, 如 `std::vector<std::map<std::string, int> >`
     - 见[例4]()
+  - 特化模板字段, 如 `std::vector<bool>`
+    - 见[例4]()
   - 任意指针模板, 任意原始指针等字段, 仅须实现自定的序列化方法
     - 见[例5](), [例6]()
-- 基于可编解码为任意格式的树型结构 `RwNode` 实现保存载入实例, 格式如 Niflect 提供的 JSON 编解码
-  - 见[例3]()
+- 可基于反射元数据自定义实例化方法, 不要求实例使用 Niflect 提供的内存管理
+  - todo: 见例?
+- 可根据必要的反射元数据遍历与处理, 实现完全自定义的实例序列化方法, 例如实现接入主流的序列化第三方库
+  - todo: 见例?
+- 可选组件: 平衡通用性与性能的序列化框架 `RwTree`
+  - 基于可编解码为任意格式的通用树型结构 `RwNode` 实现保存载入实例, 可序列化的格式如 Niflect 提供的 JSON 格式, 见[例3]()
+  - 从实例到具体序列化格式需要经过 `RwNode` 的中间树型结构, 存在固有开销, 在此特定流程下, 因该固有开销而无法达到极致序列化效率, 但架构设计能获得难以拒绝的通用性与扩展性
+
+    - 格式无关的通用序列化流程
+    - 由一份头文件定义的零冗余通信协议
 
 ### 动态反射
 
@@ -71,13 +82,6 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
 #### 仅支持可被实例化类型的反射
 
 不支持反射模板类定义, 模板偏特化字段, 即不支持带有未实例化模板参数的用法. 这是因为虽理论上可行, 但实现上将面对模板完备性的学术黑洞, 应由与编译器同级的解决方案应对
-
-#### 解耦序列化与格式而引入的固有开销
-
-从实例到具体序列化格式需要经过 `RwNode` 的中间树型结构, 存在固有开销, 在此特定流程下, 因该固有开销而无法达到极致序列化效率, 但架构设计能获得
-
-- 格式无关的通用序列化流程
-- 由一份头文件定义的零冗余通信协议
 
 ## 示例集
 
@@ -177,7 +181,7 @@ printf("%s\n", ss.str().c_str());
 
 `CJsonFormat::Write` 是 Niflect 提供的常见 `RwNode` 序列化格式之一, 实际上可基于树型结构自定义 `RwNode` 的序列化格式
 
-### 例4. 反射嵌套模板字段
+### 例4. 反射嵌套容器模板字段, 特化模板字段
 
 使用反射宏标签 `NIF_F` 声明对应字段即可, 支持的字段类型可自定义, 见[例5]()
 
@@ -188,6 +192,8 @@ class CHelloWorld
 public:
 	NIF_F()
 	std::map<std::string, std::vector<float> > m_name_to_floats;
+	NIF_F()
+	std::vector<bool> m_bits_array;
 };
 ```
 
@@ -232,7 +238,7 @@ static void LoadCVector3FromRwNode(const CRwNode* rw, CVector3& vec)
 	vec.m_z = std::stof(vecEntryStr[2].c_str());
 }
 
-class CVector3Accessor : public Niflect::CNiflectAccessor
+class CVector3Accessor : public CRwAccessor
 {
 protected:
 	virtual bool SaveImpl(const InstanceType* base, CRwNode* rw) const override
@@ -271,19 +277,19 @@ AccessorSetting.h 由 NiflectGenTool 解析并生成与设置中访问器相关�
 对于其它类型的绑定设置方法也是相同的, 例如 Niflect 提供的 STL 常用类型的绑定设置
 
 ```c++
-template <typename T0, typename T1>
-NIFAS_A() TSetting<CCompoundAccessor, std::pair<T0, T1> >;
-
-NIFAS_A() TSetting<CSTLStringAccessor, std::string>;
+//StandardRwAccessorSetting.h
+...
+NIFAS_A() TSetting<CSTLStringRwAccessor, std::string>;
 
 template <typename TInstance>
-NIFAS_A() TSetting<TSTLBitsArrayAccessor<TInstance>, std::vector<bool> >;
+NIFAS_A() TSetting<TSTLBitsArrayRwAccessor<TInstance>, std::vector<bool> >;
 
 template <typename TInstance, typename T>
-NIFAS_A() TSetting<TSTLArrayAccessor<TInstance>, std::vector<T> >;
+NIFAS_A() TSetting<TSTLArrayRwAccessor<TInstance>, std::vector<T> >;
 
 template <typename TInstance, typename T0, typename T1>
-NIFAS_A() TSetting<TSTLMapAccessor<TInstance>, std::map<T0, T1>, std::pair<T0, T1> >;
+NIFAS_A() TSetting<TSTLMapRwAccessor<TInstance>, std::map<T0, T1>, std::pair<T0, T1> >;
+...
 ```
 
 虽写法有一定特殊性, 但支持以模板方式表达绑定设置, 风格纯原生, IDE 友好, 头文件可复用, 从而使用者可通过标准语法表达实现几乎任意类型的访问器绑定
