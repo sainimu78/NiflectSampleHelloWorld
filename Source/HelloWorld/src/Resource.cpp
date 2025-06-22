@@ -2,17 +2,17 @@
 
 using CSharedResourceFactory = Niflect::TSharedPtr<CResourceFactory>;
 
-static CSharedResourceFactory* s_pointeer = NULL;
+static CSharedResourceFactory* s_addr = NULL;
 
 CResourceFactory* GetResourceFactory()
 {
 	static CSharedResourceFactory s_singleton = Niflect::MakeShared<CResourceFactory>();
-	if (s_pointeer == NULL)
-		s_pointeer = &s_singleton;
+	if (s_addr == NULL)
+		s_addr = &s_singleton;
 	return s_singleton.Get();
 }
 void DestroyResourceFactory()
 {
-	*s_pointeer = NULL;
-	s_pointeer = NULL;
+	*s_addr = NULL;
+	s_addr = NULL;
 }
