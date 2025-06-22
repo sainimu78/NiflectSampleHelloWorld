@@ -296,21 +296,203 @@ NIFAS_A() TSetting<TSTLMapRwAccessor<TInstance>, std::map<T0, T1>, std::pair<T0,
 
 ### 例6. 反射原始指针字段
 
-todo: 大致内容是与前述"任意自定义类型字段序列化"类似, 只需要通过全局单例获取指针即可
+示例类 `CResource`, 表示一种可通过 ID 查找的实例, 如文件资源
+
+#### 反射原始指针字段
+
+设置访问器绑定
+
+```c++
+NIFAS_A() TSetting<CResourceAccessor, CResource*>;
+```
+
+使用宏标签声明
+
+```c++
+NIF_T()
+class CHelloWorld
+{
+public:
+	...
+	NIF_F()
+	CResource* m_res = NULL;
+};
+```
+
+#### 序列化测试
+
+```c++
+static void InitForTest(CHelloWorld& instance)
+{
+	...
+	instance.m_res = GetResourceFactory()->Find("Note_B.txt");
+}
+static bool operator==(const CHelloWorld& lhs, const CHelloWorld& rhs)
+{
+	return ...
+		&& lhs.m_res == rhs.m_res
+		;
+}
+
+int main()
+{
+	auto factory = GetResourceFactory();
+	factory->Register("Note_A.txt");
+	factory->Register("Note_B.txt");
+	factory->Register("Note_C.txt");
+	{
+		Niflect::CNiflectModuleRegistry reg;
+		reg.InitLoadTimeModules();
+		CHelloWorld src;
+		InitForTest(src);
+		auto type = Niflect::StaticGetType<CHelloWorld>();
+		CRwNode rw;
+		SaveInstanceToRwNode(type, &src, &rw);
+		Niflect::CStringStream ss;
+		CJsonFormat::Write(&rw, ss);
+		printf("%s\n", ss.str().c_str());
+	}
+	DestroyResourceFactory();
+	return 0;
+}
+```
+
+可观察到打印结果中含初始化时指定的 `Note_B.txt`, 即实现原始指针的反射与序列化
+
+#### 示例类 `CResource` 与 `CResourceFactory`
+
+定义示例类 `CResource`, 表示一种可通过 ID 查找的实例, 如文件资源
+
+```c++
+class CResource
+{
+public:
+	const Niflect::CString* m_id = NULL;
+};
+using CSharedResource = Niflect::TSharedPtr<CResource>;
+```
+
+定义指针容器单例类 `CResourceFactory`, 表示 ID 与 `CResource` 的绑定查找表
+
+```c++
+class CResourceFactory
+{
+public:
+	CResource* Register(const Niflect::CString& id)
+	{
+		auto ret = m_mapIdToIdx.insert({ id, static_cast<int>(m_vecRes.size())});
+		const auto& idx = ret.first->second;
+		if (ret.second)
+		{
+			auto res = Niflect::MakeShared<CResource>();
+			res->m_id = &ret.first->first;
+			m_vecRes.push_back(res);
+		}
+		return m_vecRes[idx].Get();
+	}
+	CResource* Find(const Niflect::CString& id) const
+	{
+		return m_vecRes[m_mapIdToIdx.at(id)].Get();
+	}
+
+private:
+	Niflect::TMap<Niflect::CString, int> m_mapIdToIdx;
+	Niflect::TArray<CSharedResource> m_vecRes;
+};
+using CSharedResourceFactory = Niflect::TSharedPtr<CResourceFactory>;
+
+static CSharedResourceFactory* s_addr = NULL;
+CResourceFactory* GetResourceFactory()
+{
+	static auto s_singleton = Niflect::MakeShared<CResourceFactory>();
+	if (s_addr == NULL)
+		s_addr = &s_singleton;
+	return s_singleton.Get();
+}
+void DestroyResourceFactory()
+{
+	*s_addr = NULL;
+	s_addr = NULL;
+}
+```
+
+#### 示例访问器 `CResourceAccessor`
+
+使用 `GetResourceFactory` 获取单例, 实现原始指针的保存载入
+
+```c++
+class CResourceAccessor : public CRwAccessor
+{
+    using PointerType = CResource*;
+protected:
+    virtual bool SaveImpl(const InstanceType* base, CRwNode* rw) const
+    {
+        auto& instance = *static_cast<const PointerType*>(base);
+        SetRwValueAs<Niflect::CString>(rw->ToValue(), *instance->m_id);
+        return true;
+    }
+    virtual bool LoadImpl(InstanceType* base, const CRwNode* rw) const
+    {
+        auto& instance = *static_cast<PointerType*>(base);
+        instance = GetResourceFactory()->Find(GetRwValueAs<Niflect::CString>(rw->GetValue()));
+        return true;
+    }
+};
+```
+
+#### 总结
+
+本例体现以下特性
+
+##### 非侵入性
+
+不要求 `CResource` 含任何标记或特殊定义
+
+##### 任意序列化
+
+示例中的 `GetResourceFactory()->Find` 可任意替换为其它实现形式, 例如可引入某种索引化方法消除查找开销, 或引入某种状态标志避免流程冲突等等
+
+##### 复用性
+
+可将 `CResource` 相关类型改为模板或其它方式的实现, 以复用一些特定用途指针的序列化方法
+
+##### 易用性
+
+有时可能需要引入所有权管理, 反射 `std::shared_ptr` 的指针.
+
+只需要以类似方法, 即基于单例容器实现指针序列化的方法, 定义相关类型并设置访问器绑定
+
+```c++
+NIFAS_A() TSetting<CSharedResourceAccessor, CSharedResource>;
+```
+
+或使用模板作通用化设置
+
+```c++
+template <typename TInstance, typename T>
+NIFAS_E() TSetting<TSharedResourceAccessor<TInstance>, std::shared_ptr<T> >;
+```
 
 ### 例7. 不依赖类型定义头文件的实例化
 
-todo: 内容未完成, 须先调整如多个构造函数时的指定方法
+通过 `MakeSharedInstance` 可使用默认构造函数创建实例
 
 ```c++
-Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
-Niflect::TSharedPtr<void*> instance = Niflect::NiflectTypeMakeShared<void*>(type);
-CRwNode rw;
-type->SaveInstanceToRwNode(instance.Get(), &rw);
-Niflect::CStringStream ss;
-CJsonFormat::Write(&rw, ss);
-printf("%s\n", ss.str().c_str());
+#include "Niflect/Component/SharedInstance.h"
+
+void main()
+{
+    auto type = Niflect::StaticGetType<CHelloWorld>();
+    Niflect::TSharedPtr<void*> instance = Niflect::MakeSharedInstance<void*>(type);
+    CRwNode rw;
+    type->SaveInstanceToRwNode(instance.Get(), &rw);
+    Niflect::CStringStream ss;
+    CJsonFormat::Write(&rw, ss);
+    printf("%s\n", ss.str().c_str());   
+}
 ```
+
+当然地, 对应类型必须显式或隐式定义默认构造函数, 非默认构造函数创建实例见[例16]()
 
 ### 例8. 自定义反射宏标签名称
 
@@ -355,6 +537,16 @@ private:
 
 ### 例9. 反射私有字段
 
+`NIFRIEND` 宏展开代码通过 NiflectGenTool 生成, 默认时该宏反射代码仅含 `friend` 声明, 形如
+
+```c++
+friend class Niflect::CTypeBody;
+```
+
+作用即为反射生成的代码可访问对应类的私有定义
+
+`NIFRIEND` 的定义具特殊性, 宏展开的最后一行为 `private:`, 这是为了保持 `class` 定义默认为私有的规则, 因此约定该宏必须在 `class` 定义中的首行指定
+
 ```c++
 #pragma once
 #include "HelloWorld_gen.h"
@@ -368,6 +560,8 @@ private:
 	float m_value = 0.0f;
 };
 ```
+
+该宏还有扩展用法, 见[例10]()
 
 ### 例10. 通过实例获取反射元数据
 
@@ -504,7 +698,49 @@ assert(stats->m_bytesRuntime == 0);
 
 ### 例12. 模块反射元数据自动发现
 
-todo: 大致内容是在动态库加载 `LoadLibrary`/`dlopen` 后执行 `reg.InitLoadTimeModules()` 即可
+定义动态加载模板的帮助类 `CRunTimeLinkingLibrary`
+
+```c++
+class CRunTimeLinkingLibrary
+{
+public:
+	bool Load(const Niflect::CString& dirPath, const Niflect::CString& libName)
+	{
+		const auto filePath = ConvertToLibFilePath(dirPath, libName);
+#if defined(_WIN32)
+		m_handle = LoadLibrary(filePath.c_str());
+#else
+		m_handle = dlopen(filePath.c_str(), RTLD_LAZY);
+#endif
+		return true;
+	}
+
+private:
+	void* m_handle = NULL;
+};
+```
+
+只需要在 `CRunTimeLinkingLibrary::Load` 之后调用 `InitLoadTimeModules` 即可
+
+```c++
+class CRunTimeModule
+{
+public:
+	bool Reload(const Niflect::CString& dirPath, const Niflect::CString& libName)
+	{
+        m_reg.Clear();
+		if (m_lib.Load(dirPath, libName))
+			return m_reg.InitLoadTimeModules();
+		return false;
+	}
+
+private:
+	CRunTimeLinkingLibrary m_lib;
+	Niflect::CNiflectModuleRegistry m_reg;
+};
+```
+
+这与[例1]()所示, 对静态初始化阶段加载的模块初始化反射元数据方法是一致的, 区别仅在于本例的模块为动态加载
 
 ### 例13. 跨模块使用反射元数据
 
@@ -520,7 +756,94 @@ namespace Niflect
 
 ### 例14. 反射成员函数与静态函数
 
-todo: 大致内容为 NIF_M 标记函数, 着重介绍类型安全的执行方法
+#### SETI - 单参数类型擦除调用
+
+SETI 表示单参数类型擦除调用 (Single-Argument Erasure for Type-Safe Invocation), 是一种使用反射元数据调用函数的最佳实践方法, 具备传统方法无法同时实现的特性
+
+- 调用开销接近直接函数调用
+- 参数类型安全
+- 虚表无关
+
+本方法的思想是将函数的参数理解为类定义的字段
+
+因此符合 SETI 的函数, 仅要求
+
+- 无参数
+- 将所有参数改写为某个反射类的字段
+
+#### 反射成员函数
+
+定义函数的 SETI 参数类
+
+```c++
+NIF_T()
+class CArgs
+{
+public:
+    float m_in_arg0 = 0.0f;
+    int m_in_arg1 = 0;
+    bool m_out = false;
+};  
+```
+
+使用 `NIF_M` 声明反射的函数
+
+```c++
+NIF_T()
+class CHelloWorld
+{
+public:
+    NIF_M()
+    void FuncA(CArgs& ctx)
+    {
+        printf("%f, %d\n", ctx.m_in_arg0, ctx.m_in_arg1);
+        ctx.m_out = true;
+    }
+};
+```
+
+#### 查找函数反射元数据索引
+
+```c++
+static NifUint32 FindMethodIndex(const Niflect::TArray<Niflect::CMethodInfo>& vec)
+{
+    NifUint32 foundIdx = NifInvalidIndex;
+    for (NifUint32 idx = 0; idx < vec.size(); ++idx)
+    {
+        auto& it = vec[idx];
+        if (it.m_name == "FuncA")
+        {
+            foundIdx = idx;
+            break;
+        }
+    }
+    return foundIdx;
+}
+```
+
+#### SETI
+
+自行确保参数正确, 仅 Debug 时提示相应错误的调用方式
+
+```c++
+template <typename TArg>
+static void InvokeMethodSETI(Niflect::CNiflectType* type, const Niflect::CString& funcName, Niflect::InstanceType* base, TArg& arg)
+{
+    NifUint32 foundIdx = FindMethodIndex(funcName, type->m_vecMethodInfo);
+	type->InvokeMethod(foundIdx, base, arg);
+}
+```
+
+带正确性检查的调用方式, 正确则返回 `true`
+
+```c++
+template <typename TArg>
+static bool InvokeMethodCheckedSETI(Niflect::CNiflectType* type, const Niflect::CString& funcName, Niflect::InstanceType* base, TArg& arg)
+{
+    NifUint32 foundIdx = FindMethodIndex(funcName, type->m_vecMethodInfo);
+	return type->InvokeMethodChecked(foundIdx, base, arg);
+}
+```
 
 ### 例15. 反射全局变量与全局函数
 
@@ -568,6 +891,10 @@ todo: 演示 for (auto& it0: modules) for (auto& it1 : types) for (auto& it2 : f
 
 ### 例18. 将字段绑定原生类编写表示的元数据
 
+#### Nata - 原生元数据
+
+Nata 表示原生元数据 (Native Metadata), 用于类型, 字段, 函数宏标签绑定的元数据定义, 特点在于通过原生风格定义
+
 ```c++
 class CMyNata : public Niflect::CNata
 {
@@ -586,12 +913,48 @@ public:
 };
 ```
 
-todo: 大致内容如上代码片段, 着重介绍 IDE 友好, 易维护, 类型安全
+可见定义方法为纯原生语法, 具备
 
-### (本例待定)例19. 绑定字段类型别名
+- IDE 友好
+- 易维护
+- 类型安全
+- 可封装, 可简化, 可用模板定义
 
-todo: 大致内容为, 通过 NiflectGenTool 的一个选项即可允许字段类型为在 AccessorSetting.h 中绑定的类型的别名, 此用法非最佳实践, 原因是这样可能发展为滥用别名, 使 AccessorSetting.h 机制丧失易维护的核心特性
+这些特性已显著优于传统基于字符串的元数据定义方式
+
+更重要的是, Nata 概念具备实现领域元数据标准化的潜力, 这是字符串元数据不可能实现的目标
+
+### (本例待定) 例19. 绑定字段类型别名
+
+通过 NiflectGenTool 的 `-aft` 选项, 允许字段类型为在 AccessorSetting.h 中绑定类型的别名
+
+需要注意的是此用法非最佳实践, 因为这可能导致滥用别名, 使 AccessorSetting.h 机制丧失易维护的核心特性
 
 ### 例20. 集成到构建系统
 
-todo: 大致内容为运行时 Niflect 与反射代码生成工具 NiflectGenTool, 后者以目前提供的 cmake 中一行 `include(IntegrateNiflectGenTool.cmake)` 极简集成作示例, 基础使用时只需要指定需解析的头文件列表即可, 在构建时仅文件变化时触发反射生成
+目前 Niflect 处实验阶段, 未迁移到主流包管理工具
+
+简单步骤集成的前提是使用 [CMakeProjectFramework](https://github.com/sainimu78/CMakeProjectFramework) 的 cmake 项目框架, 如不使用, 则按常规的 Executable 与 Shared Library 集成方法相应操作即可
+
+#### NiflectGenTool
+
+集成 NiflectGenTool 反射代码生成工具
+
+通过局部作用域的变量配置工具功能, 如通过 `v_ListModuleHeaderFilePath` 指定需解析的头文件
+
+```cmake
+list(APPEND v_ListModuleHeaderFilePath ${ModuleHeaders})
+include(${c_RootThirdPartyDirPath}/NiflectGenTool/Exe.cmake)
+```
+
+集成后仅相应头文件变化才会触发反射代码生成, 因此不会产生冗余构建
+
+其它功能可参考 IntegrateNiflectGenTool.cmake
+
+#### Niflect
+
+集成 Niflect 运行时以使用反射元数据
+
+```cmake
+include(${c_RootThirdPartyDirPath}/Niflect/Shared.cmake)
+```
