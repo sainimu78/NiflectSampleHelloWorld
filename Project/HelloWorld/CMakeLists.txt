@@ -11,8 +11,8 @@ include(${c_RootCMakeProjectFrameworkDirPath}/ProjectEnd.cmake)
 set(ModuleName ${c_ProjectName})
 
 set(ModuleRootPath ${c_RootSourceDirPath}/${ModuleName})
-set(ModuleSourcePath ${ModuleRootPath})
-set(ModuleIncludePath ${ModuleRootPath})
+set(ModuleSourcePath ${ModuleRootPath}/src)
+set(ModuleIncludePath ${ModuleRootPath}/include)
 
 set(IncludePathsPrivate "")
 set(IncludePathsPublic "")
@@ -35,6 +35,7 @@ target_include_directories(${ModuleName}
 )
 
 list(APPEND v_ListModuleHeaderFilePath ${ModuleHeaders})
+list(APPEND v_ListAccessorSettingHeaderFilePath ${ModuleSourcePath}/AccessorSetting.h)
 set(v_EnabledLoadTimeModuleRegistrar TRUE)
 include(${c_RootThirdPartyDirPath}/Niflect/Shared.cmake)
 include(${c_RootThirdPartyDirPath}/NiflectGenTool/Exe.cmake)
