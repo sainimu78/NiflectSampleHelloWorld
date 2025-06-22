@@ -92,7 +92,7 @@ todo: 每个示例标序号, 方便引用说明, 编写带跳转的目录
 ```c++
 //HelloWorld.h
 #pragma once
-#include "Niflect/Default/DefaultMacroTag.h"
+#include "Niflect/Component/DefaultMacroTag.h"
 
 NIF_T()
 class CHelloWorld
@@ -150,7 +150,7 @@ Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
 CHelloWorld src;
 src.m_value = 1.23f;
 CRwNode rw;
-type->SaveInstanceToRwNode(&src, &rw);
+SaveInstanceToRwNode(type, &src, &rw);
 ```
 
 #### 载入
@@ -159,7 +159,7 @@ type->SaveInstanceToRwNode(&src, &rw);
 
 ```c++
 CHelloWorld dst;
-type->LoadInstanceFromRwNode(&dst, &rw);
+LoadInstanceFromRwNode(type, &dst, &rw);
 assert(src == dst);
 ```
 
@@ -235,13 +235,13 @@ static void LoadCVector3FromRwNode(const CRwNode* rw, CVector3& vec)
 class CVector3Accessor : public Niflect::CNiflectAccessor
 {
 protected:
-	virtual bool SaveInstanceImpl(const InstanceType* base, CRwNode* rw) const override
+	virtual bool SaveImpl(const InstanceType* base, CRwNode* rw) const override
 	{
 		auto& instance = *static_cast<const CVector3*>(base);
 		SaveCVector3ToRwNode(instance, rw);
 		return true;
 	}
-	virtual bool LoadInstanceImpl(InstanceType* base, const CRwNode* rw) const override
+	virtual bool LoadImpl(InstanceType* base, const CRwNode* rw) const override
 	{
 		auto& instance = *static_cast<CVector3*>(base);
 		ASSERT(rw->IsValue());
