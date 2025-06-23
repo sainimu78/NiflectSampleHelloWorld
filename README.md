@@ -817,6 +817,8 @@ void main()
 
 ### 例14. 反射成员函数与静态函数
 
+使用 `UnsafeInvokeMethod` 即可通过函数反射元数据调用函数, 此为非参数类型安全的调用方式, 与参数类型安全的调用方式 SETI 相比, 已无明显优势, 因此不作详细说明
+
 #### SETI - 单参数类型擦除调用
 
 SETI 表示单参数类型擦除调用 (Single-Argument Erasure for Type-Safe Invocation), 是一种使用反射元数据调用函数的最佳实践方法, 具备传统方法无法同时实现的特性
@@ -917,7 +919,7 @@ static bool InvokeMethodCheckedSETI(Niflect::CNiflectType* type, const Niflect::
 
 ### 例15. 反射全局变量与全局函数
 
-Niflect 框架中, 全局变量与全局函数分别被理解为一种全局作用域类中的成员变量与成员函数, 因此二者的反射方法与对类的成员变量怀成员函数是相同的
+Niflect 框架中, 全局变量与全局函数分别被理解为一种全局作用域类中的成员变量与成员函数, 因此二者的反射方法与对类的成员变量怀成员函数是相同的, 另见[例14]()
 
 ```c++
 //ExampleModule.h
