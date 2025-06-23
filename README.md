@@ -39,8 +39,8 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
     - 见[例5](), [例6]()
 - 可基于反射元数据自定义实例化方法, 不要求实例使用 Niflect 提供的内存管理
   - todo: 见例?
-- 可根据必要的反射元数据遍历与处理, 实现完全自定义的实例序列化方法, 例如实现接入主流的序列化第三方库
-  - todo: 见例?
+- 可根据必要的反射元数据遍历与处理, 实现特定的或通用的实例序列化流程, 例如实现接入主流的序列化第三方库或接入自定义的通用序列化框架
+  - 见[例21]()
 - 可选组件: 平衡通用性与性能的序列化框架 `RwTree`
   - 基于可编解码为任意格式的通用树型结构 `RwNode` 实现保存载入实例, 可序列化的格式如 Niflect 提供的 JSON 格式, 见[例3]()
   - 从实例到具体序列化格式需要经过 `RwNode` 的中间树型结构, 存在固有开销, 在此特定流程下, 因该固有开销而无法达到极致序列化效率, 但架构设计能获得难以拒绝的通用性与扩展性
@@ -959,6 +959,224 @@ include(${c_RootThirdPartyDirPath}/NiflectGenTool/Exe.cmake)
 include(${c_RootThirdPartyDirPath}/Niflect/Shared.cmake)
 ```
 
-### 例21. 自定义序列化框架
+### 例21. 实现序列化流程
 
-Niflect 中, 对访问器 (Accessor) 的实现方式无任何要求, 示例集中提到的 `RwTree` 框架以及相关类型, 是 Niflect 提供的一种序列化实现, 不是必须使用的, 使用者可根据需要任意定义访问器相关的序列化框架
+Niflect 中, 对访问器 (Accessor) 的实现方式上, 仅要求访问器继承自 `CNiflectAccessor`, 对保存载入的具体实现无要求
+
+示例集中提到的 `RwTree` 框架以及相关类型, 是 Niflect 提供的一种序列化流程的实现, 不是必须使用的, 使用者可根据需要实现序列化流程
+
+#### 访问器基类
+
+要求必须继承自 `CNiflectAccessor` 且必须在保存载入过程中可获取实例地址 , 如
+
+```c++
+//MyAccessorA.h
+class CMyAccessorA : public CNiflectAccessor
+{
+public:
+	virtual bool Save(const InstanceType* base, CMyOutputArchive& ar) const = 0;
+	virtual bool Load(InstanceType* base, CMyInputArchive& ar) const = 0;
+};
+```
+
+其中 `base` 为被保存载入的实例地址, 但并不要求必须定义在 `Save` 与 `Load` 函数参数中, 实际上只要实现能正确获取该地址即可
+
+其中 `CMyInputArchive` 与 `CMyOutputArchive` 表示所需的某种序列化实现, 无任何要求
+
+其中 `Save` 与 `Load` 可任意定义, 例如改为合并 `Save` 与 `Load` 的风格
+
+```c++
+class CMyAccessorB : public CNiflectAccessor
+{
+public:
+	virtual bool Serialize(InstanceType* base, CMyArchive& ar) const = 0;
+};
+```
+
+参数形式可自定义, 例如改为引入序列化过程优化用的内存管理对象
+
+```c++
+class CMyAccessorC : public CNiflectAccessor
+{
+public:
+	virtual bool Save(const InstanceType* base, CMyOutputArchive& ar, CMyAllocator& allocator) const = 0;
+	virtual bool Load(InstanceType* base, CMyInputArchive& ar) const = 0;
+};
+```
+
+#### 序列化流程
+
+为实现通用性, 流程的实现风格通常为递归方式
+
+```c++
+//MyAccessorA.h
+static bool SaveInstance(CNiflectType* type, const InstanceType* base, CMyOutputArchive& ar)
+{
+	for (auto& it : type->GetTypeLayout())
+	{
+		if (!it->GetDerivedAccessor<CMyAccessor>()->Save(base, ar))
+			return false;
+	}
+	return true;
+}
+static bool LoadInstance(CNiflectType* type, InstanceType* base, CMyInputArchive& ar)
+{
+	for (auto& it : type->GetTypeLayout())
+	{
+		if (!it->GetDerivedAccessor<CMyAccessor>()->Load(base, ar))
+			return false;
+	}
+	return true;
+}
+```
+
+#### 序列化 `float` 类型
+
+以建议风格 `CMyAccessorA` 为例, 序列化 `float` 类型的实例, 相应实现 `Save` 与 `Load` 即可
+
+```c++
+//ValueTypeMyAccessorA.h
+class CFloatMyAccessorA : public CMyAccessorA
+{
+public:
+	virtual bool Save(const InstanceType* base, CMyOutputArchive& ar) const override
+	{
+		auto& instance = *static_cast<const float*>(base);
+		ar.Encode<float>(instance);
+		return true;
+	}
+	virtual bool Load(InstanceType* base, CMyInputArchive& ar) const override
+	{
+		auto& instance = *static_cast<TValue*>(base);
+		ar.Decode<float>(instance);
+		return true;
+	}
+};
+```
+
+#### 序列化类与结构体类型
+
+结合序列化流程的 `SaveInstance` 与 `LoadInstance`, 通过遍历类型反射元数据实现保存载入类或结构体类型的实例
+
+```c++
+//InheritableTypeMyAccessorA.h
+class CInheritableTypeMyAccessor : public CMyAccessor
+{
+public:
+	virtual bool Save(const InstanceType* base, CMyOutputArchive& ar) const override
+	{
+		for (auto& it : this->GetOwnerType()->GetFields())
+		{
+			auto& nextAr = ar.Next(it.GetName());
+			if (!SaveInstance(it.GetType(), it.GetAddr(base), nextAr))
+				return false;
+		}
+		return true;
+	}
+	virtual bool Load(InstanceType* base, const CMyInputArchive* rw) const override
+	{
+		for (auto& it : this->GetOwnerType()->GetFields())
+		{
+			auto& nextAr = ar.Next(it.GetName());
+			if (!LoadInstance(it.GetType(), it.GetAddr(base), nextAr))
+				return false;
+		}
+		return true;
+	}
+};
+```
+
+#### 访问器设置头文件
+
+```c++
+//MyAccessorSetting.h
+#pragma once
+#include "Niflect/NiflectAccessorSetting.h"
+#include "ValueTypeMyAccessor.h"
+#include "InheritableTypeMyAccessorA.h"
+
+namespace MyAccessorSetting
+{
+	using namespace NiflectAccessorSetting;
+
+	NIFAS_B() TSetting<CInheritableTypeMyAccessor>;
+	NIFAS_A() TSetting<CFloatMyAccessorA, float>;
+}
+```
+
+其中 `NIFAS_A` 与 `NIFAS_B` 表示特定类型的绑定, 包括其它标签的具体使用说明, 见 NiflectAccessorSetting.h
+
+以使用 `CMakeProjectFramework` 为例, 通过变量指定 NiflectGenTool 所需的访问器设置头文件路径
+
+```cmake
+list(APPEND v_ListModuleHeaderFilePath ${ModuleHeaders})
+...
+list(APPEND v_ListAccessorSettingHeaderFilePath ${ModuleSourcePath}/AccessorSetting.h)
+...
+include(${c_RootThirdPartyDirPath}/NiflectGenTool/Exe.cmake)
+```
+
+#### 序列化流程测试
+
+本例中仅演示定义 `CFloatMyAccessorA` 与 `CInheritableTypeMyAccessor`, 因此测试用例如下
+
+```c++
+//MyClass.h
+#pragma once
+#include "Niflect/Component/DefaultMacroTag.h"
+
+NIF_T()
+class CMyClass
+{
+public:
+	void Init()
+    {
+        m_float_0 = 1.23f;
+    }
+    bool operator==(const CMyClass& rhs) const
+    {
+        return m_float_0 == rhs.m_float_0
+            ;
+    }
+    
+public:
+    NIF_F()
+    float m_float_0 = 0.0f;
+}
+```
+
+序列化测试
+
+```c++
+//MyAccessorExample.cpp
+#include "MyClass.h"
+#include "MyAccessorExample_private.h"
+
+void main()
+{
+    CMyClass src;
+    src.Init();
+    CMyClass dst;
+    CMyMemoryStream data;
+    
+	Niflect::CNiflectModuleRegistry reg;
+	reg.InitLoadTimeModules();
+	auto type = Niflect::StaticGetType<CMyClass>();
+    
+    CMyOutputArchive oar(data);
+    SaveInstance(type, &src, oar);
+        
+    CMyInputArchive iar(data);
+    LoadInstance(type, &dst, iar);
+    
+    assert(src == dst);
+}
+```
+
+#### 总结
+
+Niflect 提供的 `RwTree` 组件同样是按照此方式实现, 无特殊处理, 此方式即为 Niflect 框架中的序列化流程标准实现方法
+
+实现序列化流程并不是项简单的工作, 但仅须深刻理解背后的一条规则即可完全掌握实现方法
+
+- 通过访问器设置头文件设置访问器与类型的绑定, 其余实现几乎可全部自定义, 这也是 Niflect 具备原生性的重要体现
