@@ -53,7 +53,7 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
 - 构建开始时通过 NiflectGenTool 生成反射代码, 在运行时仅要求在使用前初始化反射元数据
   - 见[例1](), [例12]()
 - 获取类型反射元数据的函数定义通过 NiflectGenTool 生成, 运行时获取类型反射元数据接近零开销
-  - 见[例2]()
+  - 见[例1]()
 - 可跨模块使用反射元数据
   - 见[例12](), [例13]()
 - 通过反射元数据
@@ -112,7 +112,7 @@ class CHelloWorld
 };
 ```
 
-#### 初始化与使用类型反射元数据
+#### 初始化与获取类型反射元数据
 
 在使用前, 通过 `InitLoadTimeModules` 初始化反射元数据
 
@@ -131,7 +131,34 @@ void main()
 }
 ```
 
-通过 `StaticGetType` 以静态反射的方式获取类型反射元数据
+通过 `StaticGetType` 以静态反射的方式获取类型反射元数据, 该函数由 NiflectGenTool 生成, 定义形如
+
+```c++
+//_HelloWorld_gen_private.h
+namespace Niflect
+{
+	template <>
+	CNiflectType* StaticGetType<CHelloWorld>()
+	{
+		return TRegisteredType<CHelloWorld>::s_type;
+	}
+}
+```
+
+其中 `s_type` 的定义为类型反射元数据指针
+
+```c++
+//NiflectRegisteredType.h
+namespace Niflect
+{
+	template <typename T>
+	class TRegisteredType
+	{
+        ...
+		static CNiflectType* s_type;
+	};
+}
+```
 
 类型反射元数据 `Niflect::CNiflectType` 中包含常用类型信息, 如本例中通过 `GetTypeName` 获取的类型名称
 
