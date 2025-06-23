@@ -958,3 +958,7 @@ include(${c_RootThirdPartyDirPath}/NiflectGenTool/Exe.cmake)
 ```cmake
 include(${c_RootThirdPartyDirPath}/Niflect/Shared.cmake)
 ```
+
+### 例21. 自定义序列化框架
+
+Niflect 中, 对访问器 (Accessor) 的实现方式无任何要求, 示例集中提到的 `RwTree` 框架以及相关类型, 是 Niflect 提供的一种序列化实现, 不是必须使用的, 使用者可根据需要任意定义访问器相关的序列化框架
