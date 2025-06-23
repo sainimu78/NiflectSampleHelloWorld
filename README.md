@@ -482,6 +482,7 @@ NIFAS_E() TSetting<TSharedResourceAccessor<TInstance>, std::shared_ptr<T> >;
 
 void main()
 {
+    ...
     auto type = Niflect::StaticGetType<CHelloWorld>();
     Niflect::TSharedPtr<void> instance = Niflect::MakeSharedInstance<void>(type);
     CRwNode rw;
@@ -744,13 +745,38 @@ private:
 
 ### 例13. 跨模块使用反射元数据
 
-使用 `-gam` 选项后, NiflectGenTool 相应生成接口导出宏, 用于导出特化的类型元数据获取函数, 生成的代码形如 
+使用 `-gam` 选项后, NiflectGenTool 相应生成接口导出宏, 用于导出特化的类型元数据获取函数
+
+以名为 ExampleModule 的示例 Shared Library 为例, 在模块中定义的类型
+
+```c++
+NIF_T()
+class CExampleType
+{
+};
+```
+
+对应生成的代码为 
 
 ```c++
 namespace Niflect
 {
 	template <>
-	_ANTICHEAT_API CNiflectType* StaticGetType<CAntiCheat>();
+	_EXAMPLE_MODULE_API CNiflectType* StaticGetType<CExampleType>();
+}
+```
+
+从而在静态初始化阶段 (Load-Time) 链接 ExampleModule 的模块代码中执行 `InitLoadTimeModules` 即可一并初始化 ExampleModule 中的反射元数据
+
+```c++
+#include "ExampleType.h"
+
+void main()
+{
+	Niflect::CNiflectModuleRegistry reg;
+	reg.InitLoadTimeModules();
+	Niflect::CNiflectType* type = Niflect::StaticGetType<CExampleType>();
+	printf("%s\n", type->GetTypeName().c_str());
 }
 ```
 
