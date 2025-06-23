@@ -483,7 +483,7 @@ NIFAS_E() TSetting<TSharedResourceAccessor<TInstance>, std::shared_ptr<T> >;
 void main()
 {
     auto type = Niflect::StaticGetType<CHelloWorld>();
-    Niflect::TSharedPtr<void*> instance = Niflect::MakeSharedInstance<void*>(type);
+    Niflect::TSharedPtr<void> instance = Niflect::MakeSharedInstance<void>(type);
     CRwNode rw;
     type->SaveInstanceToRwNode(instance.Get(), &rw);
     Niflect::CStringStream ss;
@@ -910,7 +910,7 @@ public:
 
 ```c++
 Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
-Niflect::TSharedPtr<void*> instance = Niflect::UnsafeMakeSharedInstance<void*>(type, 1.23f);
+Niflect::TSharedPtr<void> instance = Niflect::UnsafeMakeSharedInstance<void>(type, 1.23f);
 CRwNode rw;
 SaveInstanceToRwNode(type, instance.Get(), &rw);
 Niflect::CStringStream ss;
@@ -948,8 +948,8 @@ public:
 Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
 CCtorContext ctx;
 ctx.m_in_arg_0 = 1.23f;
-Niflect::TSharedPtr<void*> instance;
-Niflect::MakeSharedInstanceChecked<void*>(type, instance, ctx);
+Niflect::TSharedPtr<void> instance;
+Niflect::MakeSharedInstanceChecked<void>(type, instance, ctx);
 CRwNode rw;
 SaveInstanceToRwNode(type, instance.Get(), &rw);
 Niflect::CStringStream ss;
