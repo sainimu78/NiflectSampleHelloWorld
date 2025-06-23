@@ -37,8 +37,8 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
     - 见[例4]()
   - 任意指针模板, 任意原始指针等字段, 仅须实现自定的序列化方法
     - 见[例5](), [例6]()
-- 可基于反射元数据自定义实例化方法, 不要求实例使用 Niflect 提供的内存管理
-  - todo: 见例?
+- 可基于反射元数据实现创建实例, 不要求实例使用 Niflect 提供的内存管理
+  - 见[例22]()
 - 可根据必要的反射元数据遍历与处理, 实现特定的或通用的实例序列化流程, 例如实现接入主流的序列化第三方库或接入自定义的通用序列化框架
   - 见[例21]()
 - 可选组件: 平衡通用性与性能的序列化框架 `RwTree`
@@ -761,29 +761,30 @@ namespace Niflect
 SETI 表示单参数类型擦除调用 (Single-Argument Erasure for Type-Safe Invocation), 是一种使用反射元数据调用函数的最佳实践方法, 具备传统方法无法同时实现的特性
 
 - 调用开销接近直接函数调用
-- 参数类型安全
+- 参数类型擦除
+- 参数类型运行时安全检查
 - 虚表无关
 
 本方法的思想是将函数的参数理解为类定义的字段
 
-因此符合 SETI 的函数, 仅要求
+因此 SETI 仅要求函数参数定义符合其中一项
 
 - 无参数
 - 将所有参数改写为某个反射类的字段
 
 #### 反射成员函数
 
-定义函数的 SETI 参数类
+定义函数的 SETI 参数类, 使用 `NIF_T` 声明以支持类型安全的检查
 
 ```c++
 NIF_T()
-class CArgs
+class CInvocationContext
 {
 public:
     float m_in_arg0 = 0.0f;
     int m_in_arg1 = 0;
     bool m_out = false;
-};  
+};
 ```
 
 使用 `NIF_M` 声明反射的函数
@@ -794,7 +795,7 @@ class CHelloWorld
 {
 public:
     NIF_M()
-    void FuncA(CArgs& ctx)
+    void FuncA(CInvocationContext& ctx)
     {
         printf("%f, %d\n", ctx.m_in_arg0, ctx.m_in_arg1);
         ctx.m_out = true;
@@ -803,6 +804,14 @@ public:
 ```
 
 #### 查找函数反射元数据索引
+
+查找方法可为任意, 通常以如下方式查找
+
+- 通过 Nata 绑定虚表无关的函数签名
+- 通过 Nata 绑定枚举或某种标识
+- 通过函数名
+
+本例以最易理解的函数名演示查找方法
 
 ```c++
 static NifUint32 FindMethodIndex(const Niflect::TArray<Niflect::CMethodInfo>& vec)
@@ -847,11 +856,37 @@ static bool InvokeMethodCheckedSETI(Niflect::CNiflectType* type, const Niflect::
 
 ### 例15. 反射全局变量与全局函数
 
-todo: 大致内容与前例"反射成员函数与静态函数"类似, 增加对获取全局变量与函数的特殊函数说明 `CNiflectType* GeneratedGetGlobalsType()`, 全局作用域中的反射元数据被当作类的字段与函数
+Niflect 框架中, 全局变量与全局函数分别被理解为一种全局作用域类中的成员变量与成员函数, 因此二者的反射方法与对类的成员变量怀成员函数是相同的
+
+```c++
+//ExampleModule.h
+#pragma once
+#include "Niflect/Component/DefaultMacroTag.h"
+
+NIF_F()
+extern float g_exampleGlobalThreshold;
+
+NIF_M()
+void ExampleGlobalFunc();
+```
+
+须通过生成的函数 `GeneratedGetGlobalsType` 获取相应反射元数据
+
+```c++
+#include "ExampleModule.h"
+#include "ExampleModule_private.h"
+
+void PrintGlobalVariables()
+{
+    Niflect::CNiflectType* type = Niflect::GeneratedGetGlobalsType();
+    for (auto& it : type->GetFields())
+        printf("%s\n", it.GetName().c_str());
+}
+```
 
 ### 例16. 反射非默认构造函数
 
-todo: 大致内容与例14相同, 以下为备用资料
+非默认构造函数须通过 `NIF_M` 声明, 以无默认构造函数的定义方式为例
 
 ```c++
 #pragma once
@@ -862,32 +897,81 @@ class CHelloWorld
 {
 public:
     NIF_M()
-	CHelloWorld(float value)
-		: m_value(value)
+	CHelloWorld(float someMeaningfulValue)
+		: m_someMeaningfulValue(someMeaningfulValue)
 	{
 	}
 	NIF_F()
-	float m_value;
+	float m_someMeaningfulValue;
 };
 ```
 
-在构造时须确保参数形式完全正确
+在构造时须自行确保参数形式完全正确
 
 ```c++
 Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
-Niflect::TSharedPtr<void*> instance = Niflect::NiflectTypeMakeShared<void*>(type, 1.23f);
+Niflect::TSharedPtr<void*> instance = Niflect::UnsafeMakeSharedInstance<void*>(type, 1.23f);
 CRwNode rw;
-type->SaveInstanceToRwNode(instance.Get(), &rw);
+SaveInstanceToRwNode(type, instance.Get(), &rw);
 Niflect::CStringStream ss;
 CJsonFormat::Write(&rw, ss);
 printf("%s\n", ss.str().c_str());
 ```
 
-此方式非最佳实践, 仅用于展示框架所实现的原生性
+当可确保参数定义不需要扩展性时, 此方式是可使用的, 但必须明确一点, 此方式非最佳实践, 因此建议使用 SETI 方式创建实例
+
+```c++
+NIF_T()
+class CCtorContext
+{
+public:
+    float m_in_arg0 = 0.0f;
+};
+
+NIF_T()
+class CHelloWorld
+{
+public:
+    NIF_M()
+	CHelloWorld(CCtorContext& ctx)
+        : m_someMeaningfulValue(ctx.m_in_arg0)
+	{
+	}
+	NIF_F()
+	float m_someMeaningfulValue;
+};
+```
+
+带类型安全检查的创建实例
+
+```c++
+Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
+CCtorContext ctx;
+ctx.m_in_arg_0 = 1.23f;
+Niflect::TSharedPtr<void*> instance;
+Niflect::MakeSharedInstanceChecked<void*>(type, instance, ctx);
+CRwNode rw;
+SaveInstanceToRwNode(type, instance.Get(), &rw);
+Niflect::CStringStream ss;
+CJsonFormat::Write(&rw, ss);
+printf("%s\n", ss.str().c_str());
+```
 
 ### 例17. 遍历反射元数据
 
-todo: 演示 for (auto& it0: modules) for (auto& it1 : types) for (auto& it2 : fields)
+```c++
+Niflect::CNiflectModuleRegistry reg;
+for (auto& itModule : reg.GetModules())
+{
+    printf("Module: %s\n", itModule.GetName().c_str());
+    for (auto& itType : itModule.GetTable().GetTypes())
+    {
+        printf("- %s\n", itType->GetTypeName().c_str());
+        for (auto& itField : itType->GetFields())
+    		printf("-- %s\n", itField.GetName().c_str());
+    }
+}
+```
 
 ### 例18. 将字段绑定原生类编写表示的元数据
 
@@ -1180,3 +1264,82 @@ Niflect 提供的 `RwTree` 组件同样是按照此方式实现, 无特殊处理
 实现序列化流程并不是项简单的工作, 但仅须深刻理解背后的一条规则即可完全掌握实现方法
 
 - 通过访问器设置头文件设置访问器与类型的绑定, 其余实现几乎可全部自定义, 这也是 Niflect 具备原生性的重要体现
+
+### 例22. 实现创建实例
+
+定义示例类
+
+```
+#pragma once
+#include "Niflect/Component/DefaultMacroTag.h"
+#include <string>
+
+NIF_T()
+class CHelloWorld
+{
+public:
+	bool m_bool_0 = false;
+	std::string m_str_1 = "Hello";
+};
+```
+
+以默认堆与默认构造函数创建实例为例说明
+
+```c++
+Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
+auto& ConstructFunc = type->m_vecConstructorInfo[0].m_Func;
+auto& DestructFunc = type->m_InvokeDestructorFunc;
+auto typeSize = type->GetTypeSize();
+
+auto mem = malloc(typeSize);
+ConstructFunc(mem, NULL);
+
+auto instance = static_cast<CHelloWorld*>(mem);
+printf("%s\n", instance->m_str_1.c_str());
+
+DestructFunc(mem);
+free(mem);
+```
+
+即使封装为帮助类, 这样的用法既不安全也不实用, 仅助于理解构造与析构反射元数据的作用
+
+实际使用可能更希望作如下的封装
+
+```c++
+class CReflectiveDeleter
+{
+public:
+	CReflectiveDeleter(Niflect::CNiflectType* type)
+		: m_type(type)
+	{
+
+	}
+	void operator()(void* ptr) const {
+		if (ptr) {
+			auto& DestructFunc = m_type->m_InvokeDestructorFunc;
+			DestructFunc(ptr);
+			free(ptr);
+		}
+	}
+	Niflect::CNiflectType* m_type;
+};
+
+template <typename TBase>
+static std::shared_ptr<TBase> MyMakeShared(Niflect::CNiflectType* type)
+{
+	auto& ConstructFunc = type->m_vecConstructorInfo[0].m_Func;
+	auto typeSize = type->GetTypeSize();
+	auto base = static_cast<TBase*>(malloc(typeSize));
+	ConstructFunc(base, NULL);
+	std::shared_ptr<TBase> sharedPtr(base, CReflectiveDeleter(type));
+	return sharedPtr;
+}
+```
+
+创建由 `std::shared_ptr` 管理的实例
+
+```c++
+Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
+std::shared_ptr<CHelloWorld> instance = MyMakeShared<CHelloWorld>(type);
+printf("%s\n", instance->m_str_1.c_str());
+```
