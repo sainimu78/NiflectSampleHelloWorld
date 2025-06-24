@@ -801,7 +801,7 @@ namespace Niflect
 }
 ```
 
-从而在静态初始化阶段 (Load-Time) 链接 ExampleModule 的模块代码中执行 `InitLoadTimeModules` 即可一并初始化 ExampleModule 中的反射元数据
+在静态初始化阶段 (Load-Time) 链接 ExampleModule 的模块代码中执行 `InitLoadTimeModules` 一并初始化 ExampleModule 中的反射元数据. 从而通过 `StaticGetType` 即可获取导出的类型反射原数据
 
 ```c++
 #include "ExampleType.h"
