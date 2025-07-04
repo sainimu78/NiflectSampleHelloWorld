@@ -1369,33 +1369,17 @@ free(mem);
 实际使用可能更希望作如下的封装
 
 ```c++
-class CReflectiveDeleter
-{
-public:
-	CReflectiveDeleter(Niflect::CNiflectType* type)
-		: m_type(type)
-	{
-
-	}
-	void operator()(void* ptr) const {
-		if (ptr) {
-			auto& DestructFunc = m_type->m_InvokeDestructorFunc;
-			DestructFunc(ptr);
-			free(ptr);
-		}
-	}
-	Niflect::CNiflectType* m_type;
-};
-
 template <typename TBase>
 static std::shared_ptr<TBase> MyMakeShared(Niflect::CNiflectType* type)
 {
-	auto& ConstructFunc = type->m_vecConstructorInfo[0].m_Func;
-	auto typeSize = type->GetTypeSize();
-	auto base = static_cast<TBase*>(malloc(typeSize));
-	ConstructFunc(base, NULL);
-	std::shared_ptr<TBase> sharedPtr(base, CReflectiveDeleter(type));
-	return sharedPtr;
+	void* mem = ::operator new(type->GetTypeSize());
+	type->m_vecConstructorInfo[0].m_Func(mem, nullptr);
+	auto deleter = [type](void* p)
+		{
+			type->m_InvokeDestructorFunc(p);
+			::operator delete(p);
+		};
+	return std::shared_ptr<TBase>(static_cast<TBase*>(mem), std::move(deleter));
 }
 ```
 
