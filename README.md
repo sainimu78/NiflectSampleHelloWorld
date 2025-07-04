@@ -1024,14 +1024,14 @@ printf("%s\n", ss.str().c_str());
 
 ```c++
 Niflect::CNiflectModuleRegistry reg;
-for (auto& itModule : reg.GetModules())
+for (auto& module : reg.GetModules())
 {
-    printf("Module: %s\n", itModule.GetName().c_str());
-    for (auto& itType : itModule.GetTable().GetTypes())
+    printf("Module: %s\n", module.GetName().c_str());
+    for (auto& type : module.GetTable().GetTypes())
     {
-        printf("- %s\n", itType->GetTypeName().c_str());
-        for (auto& itField : itType->GetFields())
-    		printf("-- %s\n", itField.GetName().c_str());
+        printf("- %s\n", type->GetTypeName().c_str());
+        for (auto& field : type->GetFields())
+    		printf("-- %s\n", field.GetName().c_str());
     }
 }
 ```
