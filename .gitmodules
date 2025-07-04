@@ -1,0 +1,4 @@
+[submodule "ThirdParty/CMakeProjectFramework"]
+	path = ThirdParty/CMakeProjectFramework
+	url = https://github.com/sainimu78/CMakeProjectFramework.git
+	branch = main
