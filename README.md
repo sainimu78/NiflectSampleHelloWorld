@@ -396,7 +396,7 @@ int main()
 
 #### 示例类 `CResource` 与 `CResourceFactory`
 
-定义示例类 `CResource`, 表示一种可通过 ID 查找的实例, 如文件资源
+定义示例类 `CResource`, 表示一种可通过 ID 查找的实例类型, 如表示文件资源类
 
 ```c++
 class CResource
