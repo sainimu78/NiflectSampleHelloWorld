@@ -38,9 +38,9 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
   - 任意指针模板, 任意原始指针等字段, 仅须实现自定的序列化方法
     - 见[例5](), [例6]()
 - 可基于反射元数据实现创建实例, 不要求实例使用 Niflect 提供的内存管理
-  - 见[例22]()
-- 可根据必要的反射元数据遍历与处理, 实现特定的或通用的实例序列化流程, 例如实现接入主流的序列化第三方库或接入自定义的通用序列化框架
-  - 见[例21]()
+  - 见[例24]()
+- 可根据必要的反射元数据遍历与处理, 实现通用或自定义的实例序列化流程, 例如实现接入主流的序列化第三方库或实现完全自定义的序列化框架
+  - 见[例21](), [例22](), [例23]()
 - 可选组件: 平衡通用性与性能的序列化框架 `RwTree`
   - 基于可编解码为任意格式的通用树型结构 `RwNode` 实现保存载入实例, 可序列化的格式如 Niflect 提供的 JSON 格式, 见[例3]()
   - 从实例到具体序列化格式需要经过 `RwNode` 的中间树型结构, 存在固有开销, 在此特定流程下, 因该固有开销而无法达到极致序列化效率, 但架构设计能获得难以拒绝的通用性与扩展性
@@ -82,14 +82,6 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
 #### 仅支持可被实例化类型的反射
 
 不支持反射模板类定义, 模板偏特化字段, 即不支持带有未实例化模板参数的用法. 这是因为虽理论上可行, 但实现上将面对模板完备性的学术黑洞, 应由与编译器同级的解决方案应对
-
-#### RwNode 序列化性能不如基于静态反射的实现
-
-为实现动态性, 序列化必须通过含运行时开销的方式实现, 主要开销在于遍历反射元数据以及访问器子类的保存载入虚函数调用, 这些开销导致无法达到基于静态反射或者硬编码实现的序列化等操作
-
-在实际应用中, 应根据需求相应取舍, 而不是作非此即彼的方案选择
-
-**(注, 此说明为目前的实现方式, 非定论, 现正在寻找合适的序列化库以作基准并对标优化)**
 
 ## 示例集
 
@@ -1106,7 +1098,7 @@ include(${c_RootThirdPartyDirPath}/NiflectGenTool/Exe.cmake)
 include(${c_RootThirdPartyDirPath}/Niflect/Shared.cmake)
 ```
 
-### 例21. 实现序列化流程
+### 例21. 完全自定义序列化流程
 
 Niflect 中, 对访问器 (Accessor) 的实现方式上, 仅要求访问器继承自 `CNiflectAccessor`, 对保存载入的具体实现无要求
 
@@ -1328,11 +1320,338 @@ Niflect 提供的 `RwTree` 组件同样是按照此方式实现, 无特殊处理
 
 - 通过访问器设置头文件设置访问器与类型的绑定, 其余实现几乎可全部自定义, 这也是 Niflect 具备原生性的重要体现
 
-### 例22. 实现创建实例
+### 例22. 接入第三方序列化库
+
+以模板定义访问器 `TMyBridgeAccessor`, 从而可接入 boost 的序列化模板函数
+
+```c++
+class CMyAccessor : public Niflect::CNiflectAccessor
+{
+public:
+	virtual bool Save(const InstanceType* base, boost::archive::binary_oarchive& oarchiver) const { return false; }
+	virtual bool Load(InstanceType* base, boost::archive::binary_iarchive& iarchiver) const { return false; }
+};
+
+template <typename TType>
+class TMyBridgeAccessor : public CMyAccessor
+{
+public:
+	virtual bool Save(const InstanceType* base, boost::archive::binary_oarchive& oarchiver) const override
+	{
+		auto& instance = *static_cast<const TType*>(base);
+		oarchiver << instance;
+		return true;
+	}
+	virtual bool Load(InstanceType* base, boost::archive::binary_iarchive& iarchiver) const override
+	{
+		auto& instance = *static_cast<TType*>(base);
+		iarchiver >> instance;
+		return true;
+	}
+};
+
+template <typename TInstance>
+NIFAS_B() TSetting<TMyBridgeAccessor<TInstance> >;
+```
 
 定义示例类
 
+```c++
+NIF_T()
+class CRecord
+{
+private:
+	friend class boost::serialization::access;
+
+	template<typename Archive>
+	void serialize(Archive& ar, const unsigned int)
+	{
+		ar & m_ids;
+		ar & m_strings;
+	}
+
+public:
+	NIF_F()
+	std::vector<int64_t> m_ids;
+	NIF_F()
+	std::vector<std::string> m_strings;
+};
 ```
+
+`class` 的类型以通过上述 `NIFAS_B` 指定以模板定义的访问器, NiflectGenTool 将为 `CRecord` 生成创建 `TMyBridgeAccessor<CRecord>` 访问器的代码
+
+使用 boost 的二进制格式读写
+
+```c++
+auto type = Niflect::StaticGetType<CRecord>();
+std::stringstream ss;
+boost::archive::binary_oarchive oarchiver(ss);
+SaveInstanceToBoostArchive(type, &r1, oarchiver);
+boost::archive::binary_iarchive iarchiver(ss);
+LoadInstanceFromBoostArchive(type, &r2, iarchiver);
+```
+
+#### 总结
+
+以本例的方式还可实现通过访问器接入静态反射能力. 当然, 不论是接入第三方库的功能, 还是接入未来的标准静态反射, 实现的方式都是常规的 C++ 用法, 这种兼容性体现了 Niflect 框架的原生性
+
+### 例23. 高效序列化
+
+**序列化执行效率起最关键影响的因素为读写格式**
+
+#### Boost
+
+以 boost 为基准, 实现测试框架
+
+```c++
+typedef std::vector<int64_t>     Integers;
+typedef std::vector<std::string> Strings;
+
+class CRecord
+{
+public:
+	Integers m_ids;
+	Strings  m_strings;
+
+	bool operator==(const CRecord& rhs) const
+	{
+		return m_ids == rhs.m_ids && m_strings == rhs.m_strings;
+	}
+
+private:
+	friend class boost::serialization::access;
+
+	template<typename Archive>
+	void serialize(Archive& ar, const unsigned int)
+	{
+		ar & m_ids;
+		ar & m_strings;
+	}
+};
+
+CRecord r1, r2;
+for (size_t idx = 0; idx < g_testIntegers.size(); ++idx)
+    r1.m_ids.push_back(g_testIntegers[idx]);
+for (size_t idx = 0; idx < g_testStringsCount; ++idx)
+	r1.m_strings.push_back(g_testStringValue);
+
+std::stringstream ss;
+boost::archive::binary_oarchive oarchiver(ss);
+oarchiver << r1;
+boost::archive::binary_iarchive iarchiver(ss);
+iarchiver >> r2;
+
+NIFLECT_ASSERT(r1 == r2);
+
+auto start = std::chrono::high_resolution_clock::now();
+for (size_t idx = 0; idx < iterations; ++idx)
+{
+	std::stringstream ss;
+	boost::archive::binary_oarchive oarchiver(ss);
+	oarchiver << r1;
+	boost::archive::binary_iarchive iarchiver(ss);
+	iarchiver >> r2;
+}
+auto finish = std::chrono::high_resolution_clock::now();
+auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count();
+std::cout << duration <<std::endl;
+```
+
+执行参考耗时为 2.4s
+
+#### NaiveBinary
+
+定义一种最简格式 `NaiveBinary`, 针对数组型的数据读写优化, 关键点在于批量读写同类型数据
+
+```c++
+static void StdStreamAosBinaryWrite(std::ostream& os, const std::vector<int64_t>& vec)
+{
+    auto size = static_cast<Niflect::NifUint32>(vec.size());
+    os.write(reinterpret_cast<const char*>(&size), sizeof(size));
+    if (size > 0)
+        os.write(reinterpret_cast<const char*>(&vec[0]), sizeof(int64_t) * size);
+}
+static void StdStreamAosBinaryWrite(std::ostream& os, const std::vector<std::string>& vec)
+{
+    auto size = static_cast<Niflect::NifUint32>(vec.size());
+    os.write(reinterpret_cast<const char*>(&size), sizeof(size));
+    if (size > 0)
+    {
+        std::vector<Niflect::NifUint32> vecLength;
+        vecLength.resize(size);
+        for (Niflect::NifUint32 idx = 0; idx < size; ++idx)
+            vecLength[idx] = static_cast<Niflect::NifUint32>(vec[idx].size());
+        os.write(reinterpret_cast<const char*>(vecLength.data()), sizeof(Niflect::NifUint32) * size);
+        for (Niflect::NifUint32 idx = 0; idx < size; ++idx)
+            os.write(vec[idx].data(), vecLength[idx]);
+    }
+}
+static void StdStreamAosBinaryRead(std::istream& is, std::vector<int64_t>& vec)
+{
+    Niflect::NifUint32 size = 0;
+    is.read(reinterpret_cast<char*>(&size), sizeof(size));
+    vec.resize(size);
+    if (size > 0)
+        is.read(reinterpret_cast<char*>(&vec[0]), sizeof(int64_t) * size);
+}
+static void StdStreamAosBinaryRead(std::istream& is, std::vector<std::string>& vec)
+{
+    Niflect::NifUint32 size = 0;
+    is.read(reinterpret_cast<char*>(&size), sizeof(size));
+    vec.resize(size);
+    if (size > 0)
+    {
+        std::vector<Niflect::NifUint32> vecLength;
+        vecLength.resize(size);
+        is.read(reinterpret_cast<char*>(&vecLength[0]), sizeof(Niflect::NifUint32) * size);
+        for (Niflect::NifUint32 idx = 0; idx < size; ++idx)
+            vec[idx].resize(vecLength[idx]);
+        for (Niflect::NifUint32 idx = 0; idx < size; ++idx)
+            is.read(reinterpret_cast<char*>(&vec[idx][0]), vecLength[idx]);
+    }
+}
+```
+
+使用模板元编程区分是否可使用特定类型的优化函数, 如本例中的 `std::vector<int64_t>` 与 `std::vector<std::string>`
+
+```c++
+namespace NaiveBinary
+{
+	template <typename TElem>
+	static constexpr bool CanOptimizeArraySerialization()
+	{
+		return std::is_trivial<TElem>::value;
+	}
+
+	template <typename TArrayType>
+	class TArrayAccessor : public CNaiveBinaryAccessor
+	{
+	protected:
+		virtual bool SaveImpl(const InstanceType* base, std::ostream& os) const override
+		{
+			auto& instance = *static_cast<const TArrayType*>(base);
+			if (!CCompileTimeOption::s_canOptimize)
+			{
+				auto elemType = this->GetElementType();
+				Niflect::NifUint32 size = static_cast<Niflect::NifUint32>(instance.size());
+				os.write(reinterpret_cast<const char*>(&size), sizeof(size));
+				for (auto idx = 0; idx < instance.size(); ++idx)
+				{
+					auto elemBase = &instance[idx];
+					SaveInstanceToNaiveBinary(elemType, elemBase, os);
+				}
+			}
+			else
+			{
+				StdStreamAosBinaryWrite(os, instance);
+			}
+			return true;
+		}
+		virtual bool LoadImpl(InstanceType* base, std::istream& is) const override
+		{
+			auto& instance = *static_cast<TArrayType*>(base);
+			if (!CCompileTimeOption::s_canOptimize)
+			{
+				auto elemType = this->GetElementType();
+				Niflect::NifUint32 size = 0;
+				is.read(reinterpret_cast<char*>(&size), sizeof(size));
+				instance.resize(size);
+				for (auto idx = 0; idx < instance.size(); ++idx)
+				{
+					auto elemBase = &instance[idx];
+					LoadInstanceFromNaiveBinary(elemType, elemBase, is);
+				}
+			}
+			else
+			{
+				StdStreamAosBinaryRead(is, instance);
+			}
+			return true;
+		}
+
+	private:
+		class CCompileTimeOption
+		{
+		public:
+			static constexpr bool s_canOptimize = CanOptimizeArraySerialization<typename TArrayType::value_type>();
+		};
+	};
+
+	template <>
+	constexpr bool CanOptimizeArraySerialization<std::string>()
+	{
+		return true;
+	}
+}
+```
+
+使用反射元数据以 `NaiveBinary` 格式读写
+
+```c++
+NIF_T()
+class CRecord
+{
+public:
+	bool operator==(const CRecord& rhs) const
+	{
+		return m_ids == rhs.m_ids && m_strings == rhs.m_strings;
+	}
+
+public:
+	NIF_F()
+	std::vector<int64_t> m_ids;
+	NIF_F()
+	std::vector<std::string> m_strings;
+};
+
+CRecord r1, r2;
+for (size_t idx = 0; idx < g_testIntegers.size(); ++idx)
+    r1.m_ids.push_back(g_testIntegers[idx]);
+for (size_t idx = 0; idx < g_testStringsCount; ++idx)
+	r1.m_strings.push_back(g_testStringValue);
+
+Niflect::CNiflectTable table;
+InitTable(table);
+
+using namespace NaiveBinary;
+auto type = Niflect::StaticGetType<CRecord>();
+std::stringstream ss;
+SaveInstanceToNaiveBinary(type, &r1, ss);
+LoadInstanceFromNaiveBinary(type, &r2, ss);
+
+NIFLECT_ASSERT(r1 == r2);
+
+auto start = std::chrono::high_resolution_clock::now();
+for (size_t idx = 0; idx < iterations; ++idx)
+{
+	std::stringstream ss;
+	SaveInstanceToNaiveBinary(type, &r1, ss);
+	LoadInstanceFromNaiveBinary(type, &r2, ss);
+}
+auto finish = std::chrono::high_resolution_clock::now();
+auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(finish - start).count();
+std::cout << duration <<std::endl;
+```
+
+执行参考耗时为 0.6s
+
+##### 基于以动态反射类型擦除方式实现的序列化额外开销说明
+
+对比的基准为纯标准库实现的 `StdStreamAosBinaryWrite/StdStreamAosBinaryRead` 系列函数.
+
+主要在虚函数调用与实例指针转换等, 为了动态能力引入的微小开销, 耗时比基准多约 2~5%
+
+#### 总结
+
+再次**强调**, 此示例**非表明** `NaiveBinary` 比 boost 的序列化执行效率高得多, 此示例仅表明**序列化执行效率起最关键影响的因素为读写格式**, 正如 `NaiveBinary` 的格式命名那样, 示例实现的格式为最简, 因此执行耗时短
+
+另外, 在实践中需要注意的是, 序列化的实现并非一味追求高效, 其实现应充分考虑用途, 例如目前低效实现的 `RwTree`, 其设计目的在于提升反射相关功能的复用性, 以及作为 Niflect 示例的简洁性
+
+### 例24. 通过反射元数据创建实例
+
+定义示例类
+
+```c++
 #pragma once
 #include "Niflect/Component/DefaultMacroTag.h"
 #include <string>
@@ -1346,7 +1665,7 @@ public:
 };
 ```
 
-以默认堆与默认构造函数创建实例为例说明
+以默认堆与默认构造函数为例, 通过反射元数据创建实例
 
 ```c++
 Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
@@ -1364,9 +1683,9 @@ DestructFunc(mem);
 free(mem);
 ```
 
-即使封装为帮助类, 这样的用法既不安全也不实用, 仅助于理解构造与析构反射元数据的作用
+即使封装为帮助类, 这样的用法既不安全也不实用, 仅为示意构造与析构反射元数据的作用
 
-实际使用可能更希望作如下的封装
+实际使用可能更希望实例支持所有权管理, 如
 
 ```c++
 template <typename TBase>
@@ -1390,3 +1709,5 @@ Niflect::CNiflectType* type = Niflect::StaticGetType<CHelloWorld>();
 std::shared_ptr<CHelloWorld> instance = MyMakeShared<CHelloWorld>(type);
 printf("%s\n", instance->m_str_1.c_str());
 ```
+
+如果希望使用自定义堆内存管理, 可参考 `Niflect::MakeSharedInstance` 相关定义
