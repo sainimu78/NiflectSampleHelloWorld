@@ -31,7 +31,7 @@ int main()
 	//Load dst from rw
 	CHelloWorld dst;
 	LoadInstanceFromRwNode(type, &dst, &rw);
-	assert(src == dst);
+	NIFLECT_ASSERT(src == dst);
 
 	//Serialize rw in JSON
 	Niflect::CStringStream ss;
