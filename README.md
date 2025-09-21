@@ -1711,5 +1711,3 @@ printf("%s\n", instance->m_str_1.c_str());
 ```
 
 如果希望使用自定义堆内存管理, 可参考 `Niflect::MakeSharedInstance` 相关定义
-
-### 例25. 指定默认访问器或零运行时开销
