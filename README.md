@@ -1635,7 +1635,7 @@ std::cout << duration <<std::endl;
 
 执行参考耗时为 0.6s
 
-##### 基于以动态反射类型擦除方式实现的序列化额外开销说明
+##### 基于以动态反射类型擦除方式实现序列化的额外开销说明
 
 对比的基准为纯标准库实现的 `StdStreamAosBinaryWrite/StdStreamAosBinaryRead` 系列函数.
 
@@ -1711,3 +1711,5 @@ printf("%s\n", instance->m_str_1.c_str());
 ```
 
 如果希望使用自定义堆内存管理, 可参考 `Niflect::MakeSharedInstance` 相关定义
+
+### 例25. 指定默认访问器或零运行时开销
