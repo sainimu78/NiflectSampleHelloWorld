@@ -8,6 +8,8 @@ include(${c_RootCMakeProjectFrameworkDirPath}/ProjectBegin.cmake)
 project(${c_ProjectName})
 include(${c_RootCMakeProjectFrameworkDirPath}/ProjectEnd.cmake)
 
+include(${c_RootCMakeProjectFrameworkDirPath}/InitCMakeTargetOutputDirPaths.cmake)
+
 set(ModuleName ${c_ProjectName})
 
 set(ModuleRootPath ${c_RootSourceDirPath}/${ModuleName})
