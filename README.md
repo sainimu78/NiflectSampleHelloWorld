@@ -62,7 +62,8 @@ NiflectSampleHelloWorld 是最简示例项目, 用于帮助使用者掌握 C++ �
   - 实现 AoS 到 SoA 的动态映射
     - 见[保持 OOP 风格的半自动 ECS 化示例项目](https://github.com/sainimu78/NiflectSampleAoS2SoA)
   - 实现内存布局, 虚表无关的实例替换
-    - 见[热替换示例项目](https://github.com/sainimu78/NiflectSampleHotSwap)
+    - 最简字段级热替换示例, 见[代码仓库](https://github.com/sainimu78/NiflectSampleHotSwap)
+    - TensorFlow 模型零停机热替换与字段级状态保持, 见[代码仓库](https://github.com/sainimu78/NiflectSampleHotSwappableTensorflowMultiboxDetector)
 
 ## 限制
 
