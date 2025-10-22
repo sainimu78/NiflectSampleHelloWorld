@@ -812,9 +812,9 @@ void main()
 
 使用 `UnsafeInvokeMethod` 即可通过函数反射元数据调用函数, 此为非参数类型安全的调用方式, 与参数类型安全的调用方式 SETI 相比, 已无明显优势, 因此不作详细说明
 
-#### SETI - 单参数类型擦除调用
+#### SETI - 单参数擦除的类型安全调用
 
-SETI 表示单参数类型擦除调用 (Single-Argument Erasure for Type-Safe Invocation), 是一种使用反射元数据调用函数的最佳实践方法, 具备传统方法无法同时实现的特性
+SETI 表示单参数擦除的类型安全调用 (Single-Argument Erasure for Type-Safe Invocation), 是一种使用反射元数据调用函数的最佳实践方法, 具备传统方法无法同时实现的特性
 
 - 调用开销接近直接函数调用
 - 参数类型擦除
